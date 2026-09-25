@@ -1,0 +1,29 @@
+{
+  "description": "sdd-beto: role-guard, stage-guard and git-guard (ADR-0008). No-op in projects without .sdd/config.json.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/sdd-guard.mjs", "write"],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/sdd-guard.mjs", "shell"],
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

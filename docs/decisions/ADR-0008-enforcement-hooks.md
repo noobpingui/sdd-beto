@@ -17,6 +17,8 @@ Un solo script Node, `sdd-guard.mjs`, registrado en `hooks/hooks.json` en **form
 2. **`stage-guard`** (mismas herramientas, resto de actores): no se escribe código de producción sin spec y plan aprobados. Se omite con `SDD_BYPASS=1`, que solo se lee del entorno del proceso de Claude Code.
 3. **`git-guard`** (`Bash|PowerShell`): los subagentes solo usan git de lectura; en la sesión principal, `git commit` y `git push` devuelven `ask`.
 
+**Añadido en la Fase 4:** en `<feature>/tasks.md`, el `test-author` y el `implementer` solo pueden marcar casillas (`- [ ]` → `- [x]`) con `Edit` o `MultiEdit`. El hook compara el texto antes y después ignorando las casillas, y bloquea cualquier otro cambio o un `Write` completo. Antes esa regla solo la sostenía el prompt.
+
 Reglas comunes:
 - **Sin `.sdd/config.json`, el guard no hace nada**, salvo bloquear a los agentes `sdd-beto:*` con un mensaje que pide ejecutar `/sdd-beto:init`. Así el plugin instalado a nivel de usuario no molesta en otros proyectos.
 - **Fallo interno:** *fail-closed* para agentes `sdd-beto:*` y *fail-open* con aviso para el resto.
