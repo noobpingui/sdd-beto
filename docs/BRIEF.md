@@ -7,6 +7,19 @@
 
 ---
 
+## 0. Neutralidad: este documento es temporal
+
+`sdd-beto` es un plugin **genérico**. fitnerd es solo el origen del que se porta el código y, al final, **un proyecto consumidor más**. Este brief nombra fitnerd únicamente porque hace falta para el portado. Reglas:
+
+1. **Nada específico de fitnerd dentro del plugin.** Las rutas (`backend/`, `frontend/`), los comandos (`pytest`, `npm test`, ruff), las convenciones (capas de Flask, `apiFetch`, fakes, `@require_auth`) y los ejemplos (`000-example`, `001-health-endpoint`) no se copian tal cual:
+   - lo que depende del proyecto va a `.sdd/config.json` o a la parte específica de la constitución, que genera `init` **en cada proyecto**;
+   - si hacen falta ejemplos o fixtures de prueba, se crean neutrales.
+2. **`--add-dir fitnerd` es temporal.** Solo se usa mientras se porta el código (Fases 0–4). Después se trabaja en `sdd-beto` sin acceso a fitnerd.
+3. **Las ADRs se redactan de forma genérica.** Las decisiones de §7 se reescriben como ADRs propias de `sdd-beto` en la Fase 1, sin decir "como en fitnerd". Las lecciones de §8 se incorporan a los agentes y al protocolo, y al changelog si procede, como reglas del plugin, no como problemas de un proyecto.
+4. **Este archivo se borra.** Cuando su contenido ya viva en las ADRs, en el `CLAUDE.md` propio de `sdd-beto` y en la documentación del plugin, `docs/BRIEF.md` se elimina con un commit. **Es un criterio de "hecho" del proyecto**, que se revisa al cerrar la Fase 8. Queda en el historial de git, pero ningún agente lo carga como contexto.
+5. **fitnerd es un consumidor, no una referencia.** En la Fase 7, fitnerd adopta el plugin con su propio `.sdd/config.json` y su constitución específica, igual que cualquier otro proyecto. El plugin no sabe nada de él.
+6. **Primer paso concreto:** en la Fase 0 crea el `CLAUDE.md` de `sdd-beto`, con las reglas de trabajo de §2 y esta sección de neutralidad. Así las sesiones futuras no dependen de este brief.
+
 ## 1. Objetivo
 
 Convertir el harness SDD de fitnerd en un **plugin de Claude Code portable, instalable en cualquier proyecto**. Así el usuario tiene lista la "línea de producción" (spec → plan → tasks → tests → implement → verify → review → docs → close) y solo se dedica a desarrollar soluciones.
@@ -159,7 +172,7 @@ Cada fase tiene su gate, commit y push con aprobación.
 5. **`/sdd-beto:init`.**
 6. **Prueba en seco:** instalar en un proyecto de prueba y ejecutar `init` y una feature trivial de punta a punta.
 7. **Migrar fitnerd:** en una rama de fitnerd, sustituir la copia local por el plugin.
-8. **Documentación:** README e instalación, guía de uso y changelog.
+8. **Documentación:** README e instalación, guía de uso y changelog. **Al cerrar esta fase, borra `docs/BRIEF.md`** (§0.4) y comprueba con `grep -ri fitnerd` que el plugin no contiene referencias a fitnerd. Solo se permiten en el changelog, como nota histórica sobre su origen.
 
 **Para arrancar:** el usuario abrirá la sesión con
 ```
