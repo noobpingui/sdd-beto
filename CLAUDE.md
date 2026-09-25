@@ -12,7 +12,8 @@ Cada etapa la ejecuta un subagente con permisos separados, la sesión principal 
 - **Distribución:** este repositorio es a la vez el código del plugin y su marketplace de GitHub.
 - **Configuración por proyecto:** cada proyecto consumidor tiene su `.sdd/config.json` (rutas, comandos, modelos) y su constitución. El plugin no contiene nada de ningún proyecto concreto.
 - **Diagnóstico de la documentación oficial y del harness de origen:** [`docs/00-discovery.md`](docs/00-discovery.md).
-- **Decisiones de diseño:** `docs/decisions/` (ADRs de este plugin, a partir de la Fase 1).
+- **Decisiones de diseño:** [`docs/decisions/`](docs/decisions/README.md). Antes de cambiar algo que una ADR decide, propón una ADR nueva que la sustituya.
+- **Estructura** ([ADR-0014](docs/decisions/ADR-0014-estructura-y-distribucion.md)): la raíz del repo es el marketplace y el plugin vive en `plugins/sdd-beto/` (`${CLAUDE_PLUGIN_ROOT}`). `docs/`, `tests/fixtures/` y este archivo no se instalan.
 
 ## Neutralidad: el plugin es genérico
 
@@ -46,8 +47,8 @@ Cada fase tiene su gate, su commit y su push, todos con aprobación.
 
 | Fase | Contenido | Estado |
 |---|---|---|
-| 0 | Descubrimiento: documentación oficial y lectura del harness de origen (`docs/00-discovery.md`) | en curso |
-| 1 | Decisiones de diseño como ADRs: esquema de `.sdd/config.json`, estructura, `init`, constitución, versiones | pendiente |
+| 0 | Descubrimiento: documentación oficial y lectura del harness de origen (`docs/00-discovery.md`) | hecha |
+| 1 | Decisiones de diseño como ADRs: esquema de `.sdd/config.json`, estructura, `init`, constitución, versiones | hecha |
 | 2 | Esqueleto del plugin: manifiesto, marketplace e instalación local de prueba | pendiente |
 | 3 | Portar y parametrizar agentes, skills, protocolo y plantillas | pendiente |
 | 4 | Portar y parametrizar los hooks con sus tests; ratchet de lint genérico | pendiente |
