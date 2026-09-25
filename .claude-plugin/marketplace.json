@@ -1,0 +1,14 @@
+{
+  "name": "sdd-beto",
+  "description": "Spec-Driven Development pipeline for Claude Code",
+  "owner": {
+    "name": "Noobpingui"
+  },
+  "plugins": [
+    {
+      "name": "sdd-beto",
+      "source": "./plugins/sdd-beto",
+      "description": "Spec → plan → tasks → tests → implement → verify → review → docs → close, with one subagent per role, hook-enforced boundaries and a human gate at every stage"
+    }
+  ]
+}

@@ -13,7 +13,7 @@
 ## Decisión
 - **Node ≥ 20** para todos los scripts, **sin dependencias npm** (solo módulos integrados). No hay `package.json` con dependencias en el plugin.
 - **Hooks en forma exec:** `"command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/…", …]`. Sin shell intermedia ni problemas de comillas.
-- **Scripts desde skills y agentes:** `node "${CLAUDE_PLUGIN_ROOT}/scripts/<script>.mjs" …`, escrito en el cuerpo Markdown para que Claude Code sustituya la ruta. `bin/` queda como posible mejora tras probarlo en Windows (Fase 2).
+- **Scripts desde skills y agentes:** `node "${CLAUDE_PLUGIN_ROOT}/scripts/<script>.mjs" …`, escrito en el cuerpo Markdown para que Claude Code sustituya la ruta. **No se usa `bin/`:** en la Fase 2 se comprobó que sus ejecutables funcionan desde la herramienta Bash pero no desde PowerShell ([`02-verificacion-esqueleto.md`](../02-verificacion-esqueleto.md)).
 - **Globs con un conversor propio** a expresiones regulares, con tests. Sintaxis soportada: `**`, `*`, `?` y `{a,b}`; sin extglob.
 - **Tolerancia a CRLF:** todo parseo de archivos de texto (tasks, state, plantillas) acepta `\r\n`; los reemplazos automáticos también.
 - **Rutas:** internamente siempre relativas a la raíz del proyecto y con `/`.

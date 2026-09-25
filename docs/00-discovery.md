@@ -191,6 +191,8 @@ Es preliminar: se fija con ADRs en la Fase 1.
 
 ## 8. Pendiente de comprobar en la práctica (Fase 2)
 
+> Resultados en [`02-verificacion-esqueleto.md`](02-verificacion-esqueleto.md).
+
 1. Que un hook de `hooks/hooks.json` en forma exec recibe `agent_type = "sdd-beto:<rol>"` al ejecutar un subagente del plugin (prueba con un hook que registre la entrada en un archivo).
 2. Que `${CLAUDE_PLUGIN_ROOT}` se sustituye en el cuerpo de un agente y en `allowed-tools` de una skill en Windows.
 3. Si `bin/` funciona en Windows desde Bash y desde PowerShell.

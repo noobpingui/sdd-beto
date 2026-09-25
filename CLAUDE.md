@@ -49,7 +49,7 @@ Cada fase tiene su gate, su commit y su push, todos con aprobación.
 |---|---|---|
 | 0 | Descubrimiento: documentación oficial y lectura del harness de origen (`docs/00-discovery.md`) | hecha |
 | 1 | Decisiones de diseño como ADRs: esquema de `.sdd/config.json`, estructura, `init`, constitución, versiones | hecha |
-| 2 | Esqueleto del plugin: manifiesto, marketplace e instalación local de prueba | pendiente |
+| 2 | Esqueleto del plugin: manifiesto, marketplace e instalación local de prueba (`docs/02-verificacion-esqueleto.md`) | hecha |
 | 3 | Portar y parametrizar agentes, skills, protocolo y plantillas | pendiente |
 | 4 | Portar y parametrizar los hooks con sus tests; ratchet de lint genérico | pendiente |
 | 5 | `/sdd-beto:init` | pendiente |
