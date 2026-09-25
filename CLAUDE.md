@@ -15,6 +15,13 @@ Cada etapa la ejecuta un subagente con permisos separados, la sesión principal 
 - **Decisiones de diseño:** [`docs/decisions/`](docs/decisions/README.md). Antes de cambiar algo que una ADR decide, propón una ADR nueva que la sustituya.
 - **Estructura** ([ADR-0014](docs/decisions/ADR-0014-estructura-y-distribucion.md)): la raíz del repo es el marketplace y el plugin vive en `plugins/sdd-beto/` (`${CLAUDE_PLUGIN_ROOT}`). `docs/`, `tests/fixtures/` y este archivo no se instalan.
 
+## Desarrollo
+
+- **Tests de los scripts** (Node ≥ 20, sin dependencias): `node --test plugins/sdd-beto/scripts/test/`
+- **Validar el plugin y el marketplace:** `claude plugin validate ./plugins/sdd-beto` y `claude plugin validate .`
+- **Probar el plugin sin instalarlo:** `claude --plugin-dir ./plugins/sdd-beto` (o `claude -p … --plugin-dir …` en un proyecto de prueba fuera de este repo).
+- **Estado de las features:** nunca se edita `state.json` a mano; se usa `node plugins/sdd-beto/scripts/sdd-state.mjs` (ADR-0021).
+
 ## Neutralidad: el plugin es genérico
 
 1. **Nada específico de un proyecto dentro del plugin.** Rutas (`backend/`, `src/`…), comandos (`pytest`, `npm test`, linters), convenciones de arquitectura y ejemplos **no** se escriben a mano en agentes, skills, hooks ni plantillas:
