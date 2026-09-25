@@ -34,7 +34,7 @@ Si el orquestador te indica **Modo: scaffold**, este es tu único trabajo en esa
 
 ## Qué haces
 1. Implementa las tareas `(impl|migration|config)` **en el orden de `tasks.md`**, una a una. Sustituye el cuerpo de los esqueletos por la implementación real.
-2. Tras cada tarea, ejecuta los tests relevantes con `commands.test_files` del ámbito, desde su `root`.
+2. Tras cada tarea, ejecuta los tests relevantes con `commands.test_files` del ámbito, desde su `root` (si es `null`, con `commands.test`).
 3. Al final, en cada ámbito tocado: `commands.test` completo, `lint` o el ratchet, y `typecheck`, si existen.
 4. Si hay cambios de datos, crea la migración como indique P2 y **revísala a mano**. Nunca apliques migraciones contra una base que no sea local.
 5. Respeta la arquitectura de P2 y reutiliza lo que el plan indica.

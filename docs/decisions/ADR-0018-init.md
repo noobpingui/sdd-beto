@@ -2,6 +2,7 @@
 
 - **Estado:** Aceptada · 2026-09-25
 - **Decidido por:** Claude, sobre el diseño del brief
+- **Detallada por:** ADR-0024 (implementación: la IA decide, `sdd-init.mjs` escribe)
 
 ## Contexto
 Adoptar el flujo exige analizar el repo, decidir rutas y comandos, escribir una constitución y preparar `CLAUDE.md` y los settings. Hacerlo a mano es lento y propenso a errores. Hacerlo sin revisión sería peligroso: la config decide qué protege el guard.

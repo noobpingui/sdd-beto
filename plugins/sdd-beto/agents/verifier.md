@@ -25,7 +25,7 @@ El orquestador te indica la feature (`<specs>/NNN-slug/`) y el **modo**: `red` o
 2. Obtén los archivos y ámbitos de la feature con `changed --json`. Si `state.json.scope` nombra ámbitos que no aparecen, verifícalos igualmente.
 
 ## Modo `red`, tras la etapa tests
-1. Ejecuta **solo los tests nuevos** de la feature (los archivos de test cambiados que contienen el marcador `SDD:`), con `commands.test_files` de su ámbito.
+1. Ejecuta **solo los tests nuevos** de la feature (los archivos de test cambiados que contienen el marcador `SDD:`), con `commands.test_files` de su ámbito. Si `test_files` es `null` (ecosistemas que filtran por nombre o por paquete, no por archivo), ejecuta `commands.test` y localiza en la salida los tests nuevos por su nombre; los tests que ya existían deben seguir en verde.
 2. Clasifica el fallo de **cada** test:
    - **rojo legítimo:** aserción fallida, recurso inexistente (p. ej. 404 o 405), método o atributo ausente, el error `not implemented` de un esqueleto, o un import de un módulo que el plan define y aún no existe;
    - **rojo ilegítimo:** errores de sintaxis, de configuración o fixture del test, imports de módulos que no existen **ni están en el plan**, errores de tipos en el propio test.
