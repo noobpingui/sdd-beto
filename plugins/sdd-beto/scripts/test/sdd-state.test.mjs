@@ -160,6 +160,21 @@ test('cli: snapshot de tests y comprobación (tolera CRLF, detecta cambios, nuev
   assert.deepEqual(check.data.added, ['api/tests/test_c.py']);
 });
 
+test('cli: classify cuenta producción, tests y .env.example por ámbito', (t) => {
+  const r = makeRepo(t);
+  r.write('api/tests/test_a.py', 'x\n');
+  r.write('api/.env.example', 'A=1\n');
+  r.write('README.md', '# x\n');
+  const res = r.cli('classify', '--limit', '1');
+  assert.equal(res.code, 0, res.stderr);
+  assert.equal(res.data.scopes.api.prod, 1); // api/app.py
+  assert.equal(res.data.scopes.api.tests, 1);
+  assert.deepEqual(res.data.scopes.api.examples.tests, ['api/tests/test_a.py']);
+  assert.deepEqual(res.data.env_examples, ['api/.env.example']);
+  assert.ok(res.data.other >= 2); // .sdd/config.json y README.md
+  assert.deepEqual(res.data.warnings, []);
+});
+
 test('cli: now devuelve una fecha ISO del sistema', (t) => {
   const r = makeRepo(t);
   const res = r.cli('now');

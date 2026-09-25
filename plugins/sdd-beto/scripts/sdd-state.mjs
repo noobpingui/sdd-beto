@@ -10,7 +10,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { loadConfig, ConfigError, CONFIG_REL } from './lib/config.mjs';
 import { branchFor, classify, featureFromBranch, FEATURE_RE, SLUG_RE } from './lib/paths.mjs';
-import { branchExists, changedFiles, currentBranch, refExists, toplevel } from './lib/git.mjs';
+import { branchExists, changedFiles, currentBranch, refExists, toplevel, tryGit } from './lib/git.mjs';
 import { resolveTemplate } from './lib/templates.mjs';
 import * as S from './lib/state.mjs';
 
@@ -24,6 +24,7 @@ Consultas (no escriben):
   check <etapa>                        precondiciones de una etapa (sale con 2 si falta algo)
   validate [--git]                     consistencia de state.json (con --git, también ramas y commits)
   snapshot --check                     compara los tests actuales con tests_snapshot (sale con 1 si difieren)
+  classify [--limit N]                 cuántos archivos cuenta la config como producción y test por ámbito
 
 Cambios (exigen estar en la rama de la feature):
   init <slug> --type <t> --title <texto> --scope <a,b> [--base <rama>]
@@ -228,6 +229,30 @@ function cmdSnapshotCheck(ctx, opt) {
   return { feature, snapshot_at: st.tests_snapshot.at, identical: !changed.length && !missing.length && !added.length, changed, missing, added };
 }
 
+// Cómo clasifica la config los archivos del repo (versionados y sin rastrear no ignorados).
+function cmdClassify(ctx, opt) {
+  const limit = Number.isInteger(Number(opt.limit)) && Number(opt.limit) > 0 ? Number(opt.limit) : 3;
+  const files = (tryGit(['ls-files', '-co', '--exclude-standard'], ctx.dir) || '').split('\n').map((l) => l.trim()).filter(Boolean);
+  const scopes = Object.fromEntries(Object.keys(ctx.config.scopes).map((n) => [n, { prod: 0, tests: 0, examples: { prod: [], tests: [] } }]));
+  const envExamples = [];
+  let other = 0;
+  for (const f of files) {
+    const c = classify(f, ctx.config);
+    if (c.kind === 'env_example') envExamples.push(f);
+    if (c.kind === 'other' || c.kind === 'env_example') { if (c.kind === 'other') other++; continue; }
+    const bucket = c.kind === 'test' ? 'tests' : 'prod';
+    for (const s of c.scopes) {
+      scopes[s][bucket]++;
+      if (scopes[s].examples[bucket].length < limit) scopes[s].examples[bucket].push(f);
+    }
+  }
+  const empty = Object.entries(scopes).flatMap(([n, s]) => [
+    ...(s.prod === 0 ? [`scopes.${n}.prod no coincide con ningún archivo`] : []),
+    ...(s.tests === 0 ? [`scopes.${n}.tests no coincide con ningún archivo (normal si aún no hay tests)`] : []),
+  ]);
+  return { total: files.length, scopes, env_examples: envExamples, other, warnings: empty };
+}
+
 function run(argv) {
   const { pos, opt } = parseArgs(argv);
   const cmd = pos.shift();
@@ -245,6 +270,7 @@ function run(argv) {
     case 'next': return { data: cmdNext(ctx, pos, opt) };
     case 'init': return { data: cmdInit(ctx, pos, opt) };
     case 'show': return { data: cmdShow(ctx, opt) };
+    case 'classify': return { data: cmdClassify(ctx, opt) };
     case 'validate': {
       const r = cmdValidate(ctx, opt);
       return { data: r, exit: r.valid ? 0 : 1 };
