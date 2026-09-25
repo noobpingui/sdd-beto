@@ -34,3 +34,4 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0019](ADR-0019-idioma.md) | Prompts en español; artefactos en el `language` de la config |
 | [0020](ADR-0020-plataforma.md) | Node ≥ 20 sin dependencias, hooks en forma exec, globs propios, tolerancia a CRLF |
 | [0021](ADR-0021-alcance-v1.md) | Alcance de la v1 (portado + `init` + CLI `sdd-state`) |
+| [0022](ADR-0022-uso-personal.md) | Uso personal: repo privado, sin licencia, instalación por HTTPS |

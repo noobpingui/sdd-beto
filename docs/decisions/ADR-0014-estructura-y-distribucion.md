@@ -2,6 +2,7 @@
 
 - **Estado:** Aceptada · 2026-09-25
 - **Decidido por:** usuario (P1 de `docs/00-discovery.md`)
+- **Matizada por:** ADR-0022 (uso personal y repo privado)
 - **Documentación consultada:** `plugins-reference`, `plugins/components`, `plugin-marketplaces`, `discover-plugins` (Claude Code v2.1.282)
 
 ## Contexto
@@ -25,9 +26,9 @@ sdd-beto/                          raíz del repo = marketplace "sdd-beto"
 ├── docs/                          desarrollo del plugin: discovery, decisions/ (no se instala)
 ├── tests/fixtures/                proyectos de prueba neutrales (Fase 6)
 ├── CLAUDE.md                      reglas para trabajar en este repo (no se instala)
-└── README.md, CHANGELOG.md, LICENSE
+└── README.md, CHANGELOG.md          (sin LICENSE: ADR-0022)
 ```
-- **Nombres:** marketplace `sdd-beto`, plugin `sdd-beto` (mismo `name` en la entrada y en `plugin.json`, como exige la doc). Instalación: `/plugin marketplace add <owner>/sdd-beto` y `/plugin install sdd-beto@sdd-beto`.
+- **Nombres:** marketplace `sdd-beto`, plugin `sdd-beto` (mismo `name` en la entrada y en `plugin.json`, como exige la doc). Instalación: ver ADR-0022 (repo privado, URL HTTPS).
 - **Skills sin prefijo `sdd-`** en el directorio (`skills/run/`), porque el namespace ya lo aporta el plugin: `/sdd-beto:run`. La documentación usa siempre el nombre completo, porque `/init` y `/status` chocan con comandos integrados.
 - **Desarrollo local:** `claude --plugin-dir ./plugins/sdd-beto` o el marketplace añadido como directorio local (carga en sitio; `/reload-plugins` aplica cambios).
 

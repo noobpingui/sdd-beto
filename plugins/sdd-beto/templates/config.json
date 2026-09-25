@@ -1,0 +1,33 @@
+{
+  "$comment": "Configuración SDD del proyecto (ADR-0016). La genera /sdd-beto:init; los ámbitos de ejemplo se sustituyen por los del repo. Esquema: templates/config.schema.json del plugin.",
+  "schema_version": 1,
+  "language": "es",
+  "base_branch": "main",
+  "branches": { "feature": "feat", "fix": "fix", "refactor": "refactor" },
+  "commits": { "language": "en", "style": "imperative, no conventional prefixes" },
+  "max_iterations": 3,
+  "paths": {
+    "specs": "specs",
+    "adr": "docs/decisions",
+    "docs": ["README.md", "docs/**"],
+    "env_examples": ["**/.env.example"]
+  },
+  "scopes": {
+    "app": {
+      "root": ".",
+      "prod": ["src/**"],
+      "tests": ["tests/**"],
+      "commands": {
+        "test": null,
+        "test_files": null,
+        "test_check": null,
+        "lint": null,
+        "lint_ratchet": null,
+        "typecheck": null,
+        "build": null
+      },
+      "env_hint": null
+    }
+  },
+  "models": {}
+}

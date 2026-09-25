@@ -2,6 +2,7 @@
 
 - **Estado:** Aceptada · 2026-09-25
 - **Decidido por:** usuario (P4 de `docs/00-discovery.md`)
+- **Matizada por:** ADR-0022 (uso personal)
 
 ## Contexto
 Los prompts de agentes y skills están en español y funcionan bien. Traducirlos o mantenerlos en dos idiomas duplica el trabajo de mantenimiento. Los proyectos consumidores pueden necesitar sus artefactos en otro idioma.

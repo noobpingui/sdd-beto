@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sdd-beto/config.schema.json",
+  "title": "sdd-beto project configuration (.sdd/config.json)",
+  "description": "Per-project configuration of the sdd-beto plugin. See ADR-0016.",
+  "type": "object",
+  "required": ["schema_version", "scopes"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "$comment": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "language": {
+      "type": "string",
+      "default": "es",
+      "description": "Language of generated artifacts and of the orchestrator's messages (ADR-0019)."
+    },
+    "base_branch": {
+      "type": "string",
+      "minLength": 1,
+      "default": "main",
+      "description": "Default base branch for new features; each feature records its own in state.json."
+    },
+    "branches": {
+      "type": "object",
+      "description": "Branch prefix per feature type: <prefix>/NNN-slug.",
+      "additionalProperties": false,
+      "properties": {
+        "feature": { "$ref": "#/$defs/branchPrefix", "default": "feat" },
+        "fix": { "$ref": "#/$defs/branchPrefix", "default": "fix" },
+        "refactor": { "$ref": "#/$defs/branchPrefix", "default": "refactor" }
+      }
+    },
+    "commits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "language": { "type": "string", "default": "en" },
+        "style": { "type": "string", "default": "imperative, no conventional prefixes" }
+      }
+    },
+    "max_iterations": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "specs": { "$ref": "#/$defs/relPath", "default": "specs" },
+        "adr": { "$ref": "#/$defs/relPath", "default": "docs/decisions" },
+        "docs": {
+          "description": "Globs the doc-keeper may write, besides the Proyecto section of CLAUDE.md.",
+          "$ref": "#/$defs/globList",
+          "default": ["README.md", "docs/**"]
+        },
+        "env_examples": { "$ref": "#/$defs/globList", "default": ["**/.env.example"] }
+      }
+    },
+    "scopes": {
+      "type": "object",
+      "description": "Parts of the repository, each with its own production and test globs and its commands.",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" },
+      "additionalProperties": { "$ref": "#/$defs/scope" }
+    },
+    "models": {
+      "type": "object",
+      "description": "Per-agent model override passed on each delegation (ADR-0006).",
+      "propertyNames": {
+        "enum": ["spec-writer", "planner", "task-breaker", "test-author", "implementer", "verifier", "reviewer", "doc-keeper"]
+      },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "branchPrefix": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "relPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(^|/)\\.\\.(/|$))[^\\\\]+$",
+      "description": "Path relative to the repository root, with forward slashes."
+    },
+    "glob": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(^|/)\\.\\.(/|$))[^\\\\]+$",
+      "description": "Glob relative to the repository root: **, *, ? and {a,b}. No extglob (ADR-0020)."
+    },
+    "globList": { "type": "array", "items": { "$ref": "#/$defs/glob" }, "uniqueItems": true },
+    "command": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "description": "Shell command run from the scope root. {files} = test files relative to root; null = not applicable."
+    },
+    "lintRatchet": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["format", "cmd"],
+          "additionalProperties": false,
+          "properties": {
+            "format": { "enum": ["ruff", "eslint"] },
+            "cmd": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Command that reads the file content from stdin and prints JSON; {file} = file path relative to root."
+            }
+          }
+        }
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "required": ["prod", "tests", "commands"],
+      "additionalProperties": false,
+      "properties": {
+        "root": { "$ref": "#/$defs/relPath", "default": "." },
+        "prod": { "$ref": "#/$defs/globList", "minItems": 1 },
+        "tests": { "$ref": "#/$defs/globList", "minItems": 1 },
+        "commands": {
+          "type": "object",
+          "required": ["test"],
+          "additionalProperties": false,
+          "properties": {
+            "test": { "$ref": "#/$defs/command" },
+            "test_files": { "$ref": "#/$defs/command" },
+            "test_check": { "$ref": "#/$defs/command" },
+            "lint": { "$ref": "#/$defs/command" },
+            "lint_ratchet": { "$ref": "#/$defs/lintRatchet" },
+            "typecheck": { "$ref": "#/$defs/command" },
+            "build": { "$ref": "#/$defs/command" }
+          }
+        },
+        "env_hint": {
+          "type": ["string", "null"],
+          "description": "What to suggest to the user when the environment does not respond. Never executed."
+        }
+      }
+    }
+  }
+}

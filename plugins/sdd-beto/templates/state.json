@@ -1,0 +1,33 @@
+{
+  "$comment": "Única fuente de verdad del flujo SDD de una feature. Lo escriben solo el orquestador (con sdd-state) y el verifier (red_check y verify). Etapas: spec, plan, tasks, tests, implement, verify, review, docs, close, done. Estados: in_progress, awaiting_approval, blocked, done.",
+  "schema_version": 1,
+  "feature": "NNN-slug",
+  "title": "",
+  "type": "feature",
+  "scope": [],
+  "branch": "",
+  "base_branch": "",
+  "created_at": "",
+  "stage": "spec",
+  "status": "in_progress",
+  "approvals": {
+    "spec": null,
+    "plan": null,
+    "tasks": null,
+    "tests": null,
+    "implement": null,
+    "verify": null,
+    "review": null,
+    "docs": null,
+    "close": null
+  },
+  "commits": {},
+  "iterations": { "tests": 0, "implement": 0, "review": 0 },
+  "max_iterations": 3,
+  "red_check": { "result": null, "at": null },
+  "verify": { "result": null, "at": null },
+  "review": { "verdict": null, "at": null },
+  "tests_snapshot": null,
+  "bypass": false,
+  "history": []
+}

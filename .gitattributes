@@ -1,0 +1,2 @@
+# Saltos de línea LF en el repositorio para todo el texto (ADR-0020).
+* text=auto eol=lf

@@ -29,7 +29,7 @@ Comprobaciones pendientes del §8 de [`00-discovery.md`](00-discovery.md), hecha
 | 4b | Instalación desde el marketplace como directorio local, con `--scope local` | ✅ | `sdd-beto@sdd-beto` · versión 0.1.0 · habilitado; escribe `extraKnownMarketplaces` y `enabledPlugins` en `.claude/settings.local.json` del proyecto |
 | 4c | El plugin instalado funciona sin `--plugin-dir` | ✅ | La skill se ejecutó; `CLAUDE_PLUGIN_ROOT` apunta al repo (carga en sitio, sin copia) |
 | 4d | Desinstalación limpia | ✅ | `claude plugin marketplace remove sdd-beto` quitó el marketplace y el plugin |
-| 4e | Instalación desde GitHub | ⏳ | Pendiente: requiere que el esqueleto esté publicado. Se prueba justo después del push de esta fase |
+| 4e | Instalación desde GitHub, con el repo **privado** | ✅ | `marketplace add https://github.com/noobpingui/sdd-beto.git --scope local`: clonado con las credenciales guardadas, sin preguntar; `sdd-beto@sdd-beto` 0.1.0 instalado como **copia** en `~/.claude/plugins/cache/sdd-beto/sdd-beto/0.1.0` |
 
 ## Consecuencias para el diseño
 - **ADR-0008 queda confirmada en la práctica:** el guard puede identificar cada rol por `agent_type = "sdd-beto:<rol>"`, y la sesión principal se reconoce por la ausencia de `agent_type`.
