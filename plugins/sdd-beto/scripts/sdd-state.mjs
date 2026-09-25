@@ -25,6 +25,8 @@ Consultas (no escriben):
   validate [--git]                     consistencia de state.json (con --git, también ramas y commits)
   snapshot --check                     compara los tests actuales con tests_snapshot (sale con 1 si difieren)
   classify [--limit N]                 cuántos archivos cuenta la config como producción y test por ámbito
+  changed [--kind test|prod|env_example|other]
+                                       archivos que cambió la feature respecto a su base, clasificados
 
 Cambios (exigen estar en la rama de la feature):
   init <slug> --type <t> --title <texto> --scope <a,b> [--base <rama>]
@@ -180,8 +182,10 @@ function withState(ctx, opt, mutate, { requireBranch = true } = {}) {
 function readReviewVerdict(ctx, feature) {
   const file = path.join(ctx.dir, ctx.config.paths.specs, feature, 'review.md');
   if (!existsSync(file)) throw new S.StateError('no existe review.md; indica el veredicto explícitamente');
-  const m = /\*\*Veredicto:\*\*\s*(APPROVED|CHANGES_REQUESTED)\b/.exec(readFileSync(file, 'utf8'));
-  if (!m) throw new S.StateError('review.md no tiene una línea "**Veredicto:** APPROVED|CHANGES_REQUESTED"');
+  // La línea debe tener un único veredicto: la de la plantilla ("APPROVED | CHANGES_REQUESTED") no vale.
+  const lines = readFileSync(file, 'utf8').split(/\r?\n/).filter((l) => /\*\*Veredicto:\*\*/.test(l));
+  const m = lines.length === 1 ? /^\s*(?:-\s*)?\*\*Veredicto:\*\*\s*(APPROVED|CHANGES_REQUESTED)\s*$/.exec(lines[0]) : null;
+  if (!m) throw new S.StateError('review.md debe tener una sola línea "**Veredicto:** APPROVED" o "**Veredicto:** CHANGES_REQUESTED"');
   return m[1];
 }
 
@@ -229,6 +233,20 @@ function cmdSnapshotCheck(ctx, opt) {
   return { feature, snapshot_at: st.tests_snapshot.at, identical: !changed.length && !missing.length && !added.length, changed, missing, added };
 }
 
+// Archivos que cambió la feature respecto a su base (commits de la rama + sin commitear), clasificados.
+function cmdChanged(ctx, opt) {
+  const feature = resolveFeature(ctx.dir, ctx.config, opt);
+  const st = readState(statePath(ctx.dir, ctx.config, feature));
+  const kinds = ['test', 'prod', 'env_example', 'other'];
+  if (opt.kind !== undefined && !kinds.includes(opt.kind)) throw new UsageError(`--kind debe ser uno de ${kinds.join(', ')}`);
+  const files = changedFiles(st.base_branch, ctx.dir).map((f) => {
+    const c = classify(f, ctx.config);
+    return { path: f, kind: c.kind, scopes: c.scopes, exists: existsSync(path.join(ctx.dir, f)) };
+  }).filter((f) => opt.kind === undefined || f.kind === opt.kind);
+  const scopesTouched = [...new Set(files.flatMap((f) => f.scopes))].sort();
+  return { feature, base_branch: st.base_branch, scopes_touched: scopesTouched, files };
+}
+
 // Cómo clasifica la config los archivos del repo (versionados y sin rastrear no ignorados).
 function cmdClassify(ctx, opt) {
   const limit = Number.isInteger(Number(opt.limit)) && Number(opt.limit) > 0 ? Number(opt.limit) : 3;
@@ -271,6 +289,7 @@ function run(argv) {
     case 'init': return { data: cmdInit(ctx, pos, opt) };
     case 'show': return { data: cmdShow(ctx, opt) };
     case 'classify': return { data: cmdClassify(ctx, opt) };
+    case 'changed': return { data: cmdChanged(ctx, opt) };
     case 'validate': {
       const r = cmdValidate(ctx, opt);
       return { data: r, exit: r.valid ? 0 : 1 };

@@ -120,7 +120,9 @@ test('cli: resultado del verifier y veredicto leído de review.md', (t) => {
   const st = r.state();
   st.stage = 'review';
   writeFileSync(path.join(r.dir, 'specs', '001-demo', 'state.json'), JSON.stringify(st));
-  r.write('specs/001-demo/review.md', '# Review\n\n- **Veredicto:** CHANGES_REQUESTED\n');
+  r.write('specs/001-demo/review.md', '# Review\n\n- **Veredicto:** APPROVED | CHANGES_REQUESTED\n');
+  assert.equal(r.cli('review-verdict').code, 2); // la línea sin rellenar de la plantilla no cuenta como APPROVED
+  r.write('specs/001-demo/review.md', '# Review\r\n\r\n- **Veredicto:** CHANGES_REQUESTED\r\n');
   const v = r.cli('review-verdict');
   assert.equal(v.code, 0);
   assert.equal(v.data.verdict, 'CHANGES_REQUESTED');
@@ -173,6 +175,23 @@ test('cli: classify cuenta producción, tests y .env.example por ámbito', (t) =
   assert.deepEqual(res.data.env_examples, ['api/.env.example']);
   assert.ok(res.data.other >= 2); // .sdd/config.json y README.md
   assert.deepEqual(res.data.warnings, []);
+});
+
+test('cli: changed lista y clasifica lo que cambió la feature', (t) => {
+  const r = makeRepo(t);
+  newFeature(r);
+  r.write('api/tests/test_a.py', 'x\n');
+  r.write('api/app.py', 'x = 2\n');
+  const all = r.cli('changed');
+  assert.equal(all.code, 0, all.stderr);
+  assert.deepEqual(all.data.scopes_touched, ['api']);
+  const byPath = Object.fromEntries(all.data.files.map((f) => [f.path, f.kind]));
+  assert.equal(byPath['api/app.py'], 'prod');
+  assert.equal(byPath['api/tests/test_a.py'], 'test');
+  assert.equal(byPath['specs/001-demo/state.json'], 'other');
+  const tests = r.cli('changed', '--kind', 'test');
+  assert.deepEqual(tests.data.files.map((f) => f.path), ['api/tests/test_a.py']);
+  assert.equal(r.cli('changed', '--kind', 'nope').code, 1);
 });
 
 test('cli: now devuelve una fecha ISO del sistema', (t) => {
