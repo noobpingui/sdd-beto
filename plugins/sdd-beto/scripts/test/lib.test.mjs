@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { globToRegExp, matchesAny, matchesGlob } from '../lib/glob.mjs';
 import { applyDefaults, COMMAND_KEYS, validateConfig } from '../lib/config.mjs';
-import { branchFor, classify, featureFromBranch, isRealEnv, toRel } from '../lib/paths.mjs';
+import { branchFor, classify, featureFromBranch, isRealEnv, looksLikeTest, toRel } from '../lib/paths.mjs';
 import { PLUGIN_ROOT, resolveTemplate } from '../lib/templates.mjs';
 
 const readJson = (rel) => JSON.parse(readFileSync(path.join(PLUGIN_ROOT, rel), 'utf8'));
@@ -126,6 +126,23 @@ test('paths: clasifica test, producción, .env.example y resto', () => {
   assert.equal(classify('specs/001-x/spec.md', cfg).kind, 'other');
 });
 
+test('paths: los archivos del flujo SDD nunca son producción ni test, aunque "**" los abarque (ADR-0023)', () => {
+  const wide = applyDefaults({
+    schema_version: 1,
+    paths: { adr: 'docs/adr' },
+    scopes: { app: { prod: ['**'], tests: ['**/*.test.js', 'specs/**'], commands: { test: null } } },
+  });
+  for (const rel of ['.sdd/config.json', '.sdd/constitution.md', '.sdd/templates/plan.md', '.claude/settings.json',
+    'CLAUDE.md', 'CLAUDE.local.md', 'AGENTS.md', 'lib/CLAUDE.md', 'specs/001-x/state.json', 'specs', 'docs/adr/ADR-0001-x.md']) {
+    assert.deepEqual(classify(rel, wide), { kind: 'other', scopes: [] }, rel);
+  }
+  assert.equal(classify('lib/a.js', wide).kind, 'prod');
+  assert.equal(classify('lib/a.test.js', wide).kind, 'test');
+  assert.equal(classify('docs/guide.md', wide).kind, 'prod'); // solo paths.adr se excluye, no todo docs/
+  assert.equal(classify('specsheet/a.js', wide).kind, 'prod'); // prefijo de carpeta, no de texto
+  assert.equal(classify('.sddrc', wide).kind, 'prod');
+});
+
 test('paths: .env reales frente a ejemplos', () => {
   assert.ok(isRealEnv('.env', cfg));
   assert.ok(isRealEnv('api/.env.local', cfg));
@@ -159,4 +176,13 @@ test('templates: usa la del plugin si el proyecto no la sobrescribe', () => {
   assert.equal(r.source, 'plugin');
   assert.throws(() => resolveTemplate('../x', '/p'), /no válido/);
   assert.throws(() => resolveTemplate('nada.md', '/p'), /no existe/);
+});
+
+test('paths: looksLikeTest reconoce tests por nombre o carpeta, pero no la documentación', () => {
+  for (const rel of ['a/test_x.py', 'a/x_test.go', 'a/x.test.ts', 'a/x.spec.js', 'tests/a.js', 'a/__tests__/b.js', 'spec/a_spec.rb']) {
+    assert.ok(looksLikeTest(rel), rel);
+  }
+  for (const rel of ['a/x.js', 'a/contest.js', 'a/testing.js', 'skills/test/SKILL.md', 'docs/specs/api.md', 'tests/notes.txt']) {
+    assert.ok(!looksLikeTest(rel), rel);
+  }
 });

@@ -243,3 +243,13 @@ test('el proceso responde con JSON de hook válido y encuentra la config desde u
   const brokenAgent = run('write', '{"agent_type":"sdd-beto:implementer", "tool_input": ', { CLAUDE_PROJECT_DIR: dir });
   assert.equal(brokenAgent.status, 0);
 });
+
+test('con prod "**", la sesión principal edita la config SDD fuera de una feature y el planner escribe ADRs (ADR-0023)', () => {
+  const wide = applyDefaults({ schema_version: 1, scopes: { app: { prod: ['**'], tests: ['test/**'], commands: { test: null } } } });
+  const main = ctx({ branch: 'main', config: wide });
+  for (const rel of ['.sdd/config.json', '.sdd/constitution.md', 'CLAUDE.md', '.claude/settings.json', 'specs/README.md']) {
+    assert.equal(write(null, rel, main), null, rel);
+  }
+  assert.ok(denied(write(null, 'lib/a.js', main)));
+  assert.equal(write(A('planner'), 'docs/decisions/ADR-0001-x.md', ctx({ stage: 'plan', config: wide })), null);
+});

@@ -35,3 +35,4 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0020](ADR-0020-plataforma.md) | Node ≥ 20 sin dependencias, hooks en forma exec, globs propios, tolerancia a CRLF |
 | [0021](ADR-0021-alcance-v1.md) | Alcance de la v1 (portado + `init` + CLI `sdd-state`) |
 | [0022](ADR-0022-uso-personal.md) | Uso personal: repo privado, sin licencia, instalación por HTTPS |
+| [0023](ADR-0023-archivos-del-flujo-no-son-produccion.md) | `.sdd/`, `.claude/`, `CLAUDE.md`, `AGENTS.md`, `paths.specs` y `paths.adr` nunca son producción ni test |

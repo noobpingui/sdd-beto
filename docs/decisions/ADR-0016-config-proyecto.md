@@ -2,6 +2,7 @@
 
 - **Estado:** Aceptada · 2026-09-25
 - **Decidido por:** Claude, a partir del borrador del brief y de las respuestas P3–P6 del usuario
+- **Matizada por:** ADR-0023 (los archivos del flujo SDD nunca son producción ni test)
 
 ## Contexto
 El plugin no puede tener rutas ni comandos de ningún proyecto. El guard, el ratchet y los agentes `test-author`, `implementer`, `verifier` y `doc-keeper` necesitan saber qué es código de producción, qué son tests y cómo se ejecutan los tests, el lint, el typecheck y el build de cada parte del repo.

@@ -48,3 +48,8 @@ export function changedFiles(base, cwd) {
   const committed = (tryGit(['diff', '--name-only', `${base}...HEAD`], cwd) || '').split('\n').map((l) => l.trim()).filter(Boolean);
   return [...new Set([...committed, ...workingTreeChanges(cwd)])].sort();
 }
+
+// Archivos del repo: versionados y sin rastrear que no estén ignorados.
+export function repoFiles(cwd) {
+  return (tryGit(['ls-files', '-co', '--exclude-standard'], cwd) || '').split('\n').map((l) => l.trim()).filter(Boolean);
+}
