@@ -39,6 +39,7 @@ Ejecuta `sdd-init` siempre como `node <ruta>/sdd-init.mjs <comando> …`, **sin 
      - `schema_version` menor: habría que migrar la config. Esta versión del plugin no tiene migraciones: indícalo y detente.
      - config no válida: muestra `issues`; el paso 2 propondrá la corrección.
      - En este modo, cada paso propone **solo el diff** respecto a lo que existe y respeta lo que ya está bien.
+     - Si `sdd.local_permissions` existe con `up_to_date: false` (el plugin se actualizó y cambió de ruta), el paso 4 propone de nuevo `--local-permissions`, que sustituye las reglas antiguas.
    - `sdd.claude_md.sections` con algún `broken`: `integrate` fallará hasta que se corrijan las marcas. Avísalo ya en el gate 1.
 
 ## Paso 1 · Análisis (solo lectura)
@@ -75,7 +76,7 @@ A partir de aquí los hooks del plugin ya están activos en este repo (la config
 ## Paso 3 · Propuesta de `.sdd/constitution.md` (Parte II)
 1. Lee la constitución base y la plantilla de la Parte II. Redacta la Parte II siguiendo la plantilla (P1 a P4) y el `language` de la config.
 2. Cada regla sale de **lo que el código ya hace**: cita la evidencia en tu mensaje (no en el archivo). Prioriza lo que un agente necesita para no romper las convenciones:
-   - **P1, por ámbito:** dónde van los tests y cómo se nombran, cómo se aíslan las dependencias, qué servicios necesitan y la **forma exacta de los esqueletos** (Art. B5.6) en ese lenguaje (ver analysis.md).
+   - **P1, por ámbito:** dónde van los tests y cómo se nombran, cómo se aíslan las dependencias, qué servicios necesitan y la **forma exacta de los esqueletos** (Art. B5.6) en ese lenguaje (ver analysis.md). Si el linter del ámbito marca los parámetros no usados sin ignorar el prefijo `_` (p. ej. `no-unused-vars` de eslint por defecto), los esqueletos generarán violaciones: dilo en el gate y ofrece las dos salidas de analysis.md §6.
    - **P2:** capas o módulos y sus dependencias permitidas, dónde vive cada tipo de lógica, cómo se expresan los errores, utilidades que se deben reutilizar.
    - **P3:** autenticación, validación de entradas, secretos y acceso a datos, según lo que exista.
    - **P4:** solo si el proyecto necesita algo más que el Art. B7; si no, "Ninguno".
@@ -86,20 +87,21 @@ Gate 3: muestra el texto completo (o el diff) y pregunta **"¿Apruebas la consti
 
 ## Paso 4 · Integración
 1. **Sección Proyecto de `CLAUDE.md`** (ADR-0013). Si `scan` la marcó como `ok`, **se conserva**: la mantiene el `doc-keeper` y no se propone de nuevo, salvo que el usuario pida rehacerla (`--replace-project-section`). Si no existe, redacta un borrador en el `language` de la config, de 10 a 25 líneas, empezando por `## Proyecto`: qué es, áreas, arquitectura, despliegue y puntos delicados. Para los comandos, remite a la tabla de ámbitos de la sección Convenciones; no la repitas.
-2. **Dos decisiones para el usuario, sobre `.claude/settings.json`:**
-   - **Límite de profundidad de subagentes** (ADR-0001): `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` impide que un subagente lance otros y se salte la separación de roles. Afecta a **toda** sesión en este proyecto, también fuera del flujo SDD. **Recomendado: sí.** Si lo rechaza, usa `--no-depth-limit`.
-   - **Marketplace del plugin:** `extraKnownMarketplaces` y `enabledPlugins` dejan escrito en el repo de dónde se obtiene `sdd-beto`. Solo sirve a quien abra el repo en otra máquina: no instala nada solo y exige confiar en la carpeta. Si el plugin ya está instalado a nivel de usuario, no aporta nada. **Recomendado: no**, salvo que el usuario lo pida. Si lo acepta, usa `--marketplace`.
+2. **Tres decisiones para el usuario:**
+   - **Límite de profundidad de subagentes** (ADR-0001), en `.claude/settings.json`: `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` impide que un subagente lance otros y se salte la separación de roles. Afecta a **toda** sesión en este proyecto, también fuera del flujo SDD. **Recomendado: sí.** Si lo rechaza, usa `--no-depth-limit`.
+   - **Marketplace del plugin**, en `.claude/settings.json`: `extraKnownMarketplaces` y `enabledPlugins` dejan escrito en el repo de dónde se obtiene `sdd-beto`. Solo sirve a quien abra el repo en otra máquina sin el plugin instalado: no instala nada solo y exige confiar en la carpeta. **Recomendado: no**, salvo que el usuario lo pida. Si lo acepta, usa `--marketplace`.
+   - **Permisos locales del plugin** (ADR-0026), en `.claude/settings.local.json`, que es personal y no se versiona: reglas `allow` para leer los archivos del plugin y ejecutar `sdd-state` y `lint-ratchet` sin un aviso de permiso cada vez. Llevan la ruta del plugin en esta máquina, así que al actualizar el plugin hay que reejecutar init (`scan` lo detecta: `sdd.local_permissions.up_to_date`). Si `.gitignore` no ignora ese archivo, el script lo añade. **Recomendado: sí** si se va a usar el flujo en una sesión interactiva. Si lo acepta, usa `--local-permissions`.
 3. Ejecuta `sdd-init integrate --dry-run` con las opciones que correspondan (y `--project-section -` con el borrador por stdin). Presenta:
    - las carpetas que se crean (`paths.specs`, `paths.adr`);
    - `CLAUDE.md`: qué pasa con cada sección (`create`, `update`, `unchanged`, `kept`), el borrador de Proyecto y, si el archivo es nuevo y existe `AGENTS.md`, que se importa con `@AGENTS.md`;
-   - `.claude/settings.json`: las `notes` del script, que listan cada cambio;
-   - las dos preguntas del punto 2, con su recomendación.
+   - `.claude/settings.json`, `.claude/settings.local.json` y `.gitignore`: las `notes` del script, que listan cada cambio;
+   - las tres preguntas del punto 2, con su recomendación.
 
-Gate 4: **"¿Apruebas la integración, con estas respuestas a las dos preguntas?"** Con la aprobación, ejecuta el mismo `integrate` sin `--dry-run` y comprueba que las acciones coinciden con las del ensayo.
+Gate 4: **"¿Apruebas la integración, con estas respuestas a las tres preguntas?"** Con la aprobación, ejecuta el mismo `integrate` sin `--dry-run` y comprueba que las acciones coinciden con las del ensayo.
 
 ## Paso 5 · Commit
 1. **Rama:** `chore/sdd-init`, u otra si el usuario la prefiere. Si ya estás en una rama que no es la base, pregunta si se commitea ahí.
-2. **Archivos**, añadidos por su ruta y solo los que cambiaron: `.sdd/config.json`, `.sdd/constitution.md`, `CLAUDE.md`, `.claude/settings.json` (si se tocó), los `.gitkeep` de `paths.specs` y `paths.adr` y el ADR del proyecto si lo hubo. **Nunca** `.claude/settings.local.json` ni archivos ajenos a init.
+2. **Archivos**, añadidos por su ruta y solo los que cambiaron: `.sdd/config.json`, `.sdd/constitution.md`, `CLAUDE.md`, `.claude/settings.json` (si se tocó), `.gitignore` (si el script le añadió `.claude/settings.local.json`), los `.gitkeep` de `paths.specs` y `paths.adr` y el ADR del proyecto si lo hubo. **Nunca** `.claude/settings.local.json` ni archivos ajenos a init.
 3. **Mensaje:** según `commits` de la config (idioma y estilo), p. ej. en inglés e imperativo: `Set up the sdd-beto spec-driven workflow`, terminado con la línea `Co-Authored-By` que indique el entorno.
 4. Muestra `git status --short`, la lista de archivos que vas a añadir, un resumen y el mensaje.
 

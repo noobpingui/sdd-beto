@@ -27,6 +27,13 @@ Si solo hay evidencia de tipo 4, propón el comando habitual de esa herramienta 
 ## 4. Comandos por ecosistema
 `{files}` se sustituye por las rutas relativas a `root`, separadas por espacios; `{file}`, por una sola ruta, ya entre comillas. No pongas comillas alrededor de los marcadores.
 
+**Cada comando debe funcionar en dos shells.** Los agentes lo ejecutan con Bash o PowerShell, pero `lint-ratchet` lo lanza con la shell del sistema, que en Windows es `cmd.exe`. Por eso:
+- pon entre comillas dobles las rutas a ejecutables, sobre todo si empiezan por `.` o `..` (`"../.venv/Scripts/python" -m pytest`), porque `cmd.exe` no las interpreta sin comillas;
+- no uses sintaxis exclusiva de una shell: variables (`$VAR`, `%VAR%`), `&&` encadenados, globs de la shell o `~`;
+- si el comando depende de un entorno virtual o de una herramienta local, invócala por su ruta (como arriba) o a través del gestor del ecosistema (`npx`, `python -m`), no dando por hecho que está activado.
+
+Si puedes, comprueba en el paso 2 el `lint_ratchet` de cada ámbito a través de la shell del sistema (`node -e` con `spawnSync(cmd, { shell: true })`), igual que hace el ratchet.
+
 | Ecosistema | `test` | `test_files` | `test_check` (recolecta o compila, **sin ejecutar**) |
 |---|---|---|---|
 | Node · vitest | script `test` del manifiesto | `npx vitest run {files}` | `npx vitest list {files}` o el typecheck si es TypeScript |
@@ -77,6 +84,11 @@ Si el repo usa otro linter, usa `lint` (el comando normal, que debe pasar sin er
   | PHP | `throw new \LogicException('not implemented');` |
 
   Si el proyecto ya tiene su propia convención, se respeta siempre que el mensaje sea `not implemented`.
+- **Prefijo `_` y linters:** el Art. B5.6 pide prefijar con `_` los parámetros de los esqueletos. Algunos linters no lo ignoran por defecto (p. ej. `no-unused-vars` de eslint necesita `argsIgnorePattern: '^_'`). Si es el caso, cada esqueleto añade una violación hasta que se implementa. Ofrece dos salidas en el gate 3:
+  1. aceptarlo: con `lint_ratchet`, el ratchet se evalúa en `verify`, cuando el `_` ya no está; con `lint` normal, el esqueleto falla el lint mientras exista;
+  2. cambiar la configuración del linter (p. ej. `argsIgnorePattern: '^_'`), como un cambio aparte del proyecto, **no** dentro de init.
+
+  Anota en P1 la opción elegida.
 - **P2 · Arquitectura:** capas o módulos y qué puede importar a qué, dónde viven la validación, la lógica de negocio y el acceso a datos, cómo se inyectan las dependencias, cómo se representan los errores, migraciones de datos y utilidades que ya existen y deben reutilizarse.
 - **P3 · Seguridad:** cómo se autentica y autoriza (decoradores, middleware, guards), cómo se validan las entradas, dónde viven los secretos y cómo se accede a los datos (ORM, consultas parametrizadas).
 - Lee 2 o 3 archivos representativos por ámbito antes de escribir una regla. Una regla que el código actual incumple de forma generalizada no es una convención: pregúntala.

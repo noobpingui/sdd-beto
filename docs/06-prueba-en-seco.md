@@ -72,20 +72,20 @@ Gravedad: **A** bloquea o rompe algo · **M** fricción o riesgo real · **B** d
 | H1 | A | `skills/init/analysis.md` salió dañado en `9d47691`: un `String.replace` con `'^$'` interpretó `` $' `` como patrón especial y duplicó medio archivo. | **Corregido en esta fase**, porque afectaba a la prueba. Lección: en ediciones por script, no pasar texto con `$` como reemplazo de `String.replace`. |
 | H5 | A | El "ask" del git-guard para `commit` y `push` en la sesión principal: en `-p` y en cualquier contexto sin interfaz equivale a **denegar**, y el hook `PermissionRequest` ni siquiera se ejecuta. En una sesión interactiva supone una **doble aprobación** (chat + aviso). | **Resuelto** con la opción (a): [ADR-0025](decisions/ADR-0025-git-guard-sin-ask.md). |
 | H7 | M | El git-guard pide confirmación para `commit` y `push`, pero no para `merge`, que también crea un commit y además en la rama base. | **Resuelto** con la opción (a): [ADR-0025](decisions/ADR-0025-git-guard-sin-ask.md). |
-| H2 | M | `lint-ratchet` ejecuta los comandos con `shell: true` (en Windows, `cmd.exe`) y los agentes con Bash o PowerShell. Un comando de la config tiene que funcionar en ambas shells, y no está documentado. | Documentarlo en la ADR-0016 y en `analysis.md` (rutas entre comillas; nada de sintaxis exclusiva de una shell). |
-| H3 | M | La regla del prefijo `_` en los parámetros de los esqueletos (Art. B5.6) choca con `no-unused-vars` de eslint, que por defecto no ignora `_`. | `analysis.md` y el paso 3 de init: detectarlo y proponer `argsIgnorePattern: '^_'` como cambio del proyecto, o anotarlo en P1. |
-| H4 | B | La columna Lint de la tabla de ámbitos de `CLAUDE.md` muestra el comando del ratchet (con `{file}` y stdin), que no sirve para ejecutarlo a mano. | `scopesTable`: mostrar `lint` si existe o "ratchet (ruff/eslint)". |
+| H2 | M | `lint-ratchet` ejecuta los comandos con `shell: true` (en Windows, `cmd.exe`) y los agentes con Bash o PowerShell. Un comando de la config tiene que funcionar en ambas shells, y no está documentado. | **Resuelto:** nota en la ADR-0016, `analysis.md` §4 y descripción del esquema. |
+| H3 | M | La regla del prefijo `_` en los parámetros de los esqueletos (Art. B5.6) choca con `no-unused-vars` de eslint, que por defecto no ignora `_`. | **Resuelto:** `analysis.md` §6 y paso 3 de `init` (dos salidas; la elegida se anota en P1). |
+| H4 | B | La columna Lint de la tabla de ámbitos de `CLAUDE.md` muestra el comando del ratchet (con `{file}` y stdin), que no sirve para ejecutarlo a mano. | **Resuelto:** la tabla muestra `lint` o "ratchet (formato)". |
 
 ### Del comportamiento de los agentes
 
 | ID | Grav. | Hallazgo | Propuesta |
 |---|---|---|---|
-| O1 | M | 156 avisos de permiso en toda la prueba. Muchos son lecturas de archivos del plugin (constitución, plantillas), las invocaciones de `sdd-state` y los comandos compuestos (`cd … && …`). En interactivo son interrupciones constantes. | Valorar que `init` proponga reglas `allow` en `.claude/settings.local.json`, porque la ruta del plugin depende de la máquina: lectura de `${CLAUDE_PLUGIN_ROOT}` y `node <plugin>/scripts/sdd-state.mjs *`. Además, pedir en el protocolo comandos simples en lugar de cadenas `&&`. |
-| O6 | M | Los agentes anotan los bloques de comentarios del usuario: el reviewer les añade "(Iteración 1)" y el `doc-keeper` mete una nota suya dentro de la cita. El texto del usuario se conserva, pero ya no está solo. | Añadir a los agentes que escriben informes: "las secciones de comentarios del usuario no se editan; tus notas van fuera". |
-| O4 | B | Tras un corte del entorno, el orquestador atribuyó al usuario un "[Request interrupted by user]" generado por el sistema. | Protocolo: ante una interrupción, preguntar en lugar de suponer que la pidió el usuario. |
-| O3 | B | Para una feature pequeña: 27 criterios, 31 tareas y 26 tests. Es coherente con la trazabilidad, pero pesado. | Para después de la v1: valorar un modo ligero para cambios triviales, dentro de las excepciones del Art. B1.2. |
-| O5 | B | Tras corregir solo tests, el protocolo obliga a pasar de nuevo por el gate de `implement` sin cambios de código. | Protocolo: si el `rework` no toca producción, `implement` se cierra en el mismo gate que la corrección. |
-| O2 | B | La skill da a entender que el plugin siempre está "instalado a nivel de usuario", y con `--plugin-dir` no es así. | Redacción de la pregunta del marketplace en `skills/init/SKILL.md`. |
+| O1 | M | 156 avisos de permiso en toda la prueba. Muchos son lecturas de archivos del plugin (constitución, plantillas), las invocaciones de `sdd-state` y los comandos compuestos (`cd … && …`). En interactivo son interrupciones constantes. | **Resuelto:** [ADR-0026](decisions/ADR-0026-permisos-locales.md) (`--local-permissions`) y protocolo (invocar las CLIs de forma literal). |
+| O6 | M | Los agentes anotan los bloques de comentarios del usuario: el reviewer les añade "(Iteración 1)" y el `doc-keeper` mete una nota suya dentro de la cita. El texto del usuario se conserva, pero ya no está solo. | **Resuelto:** prompt de delegación del protocolo y prompts del `reviewer` y del `doc-keeper`. |
+| O4 | B | Tras un corte del entorno, el orquestador atribuyó al usuario un "[Request interrupted by user]" generado por el sistema. | **Resuelto:** principio 6 del protocolo. |
+| O3 | B | Para una feature pequeña: 27 criterios, 31 tareas y 26 tests. Es coherente con la trazabilidad, pero pesado. | **Pendiente:** para después de la v1. |
+| O5 | B | Tras corregir solo tests, el protocolo obliga a pasar de nuevo por el gate de `implement` sin cambios de código. | **Pendiente:** contradice la ADR-0004 ("nunca se agrupan varias etapas en una aprobación"); cambiarlo exige una ADR nueva. |
+| O2 | B | La skill da a entender que el plugin siempre está "instalado a nivel de usuario", y con `--plugin-dir` no es así. | **Resuelto:** nueva redacción de la pregunta del marketplace. |
 
 ### Del entorno
 

@@ -15,7 +15,7 @@ Eres el **implementer** del flujo SDD de `sdd-beto`. Haces que los tests en rojo
   - `commands`: `test_files` (con `{files}` = rutas relativas a `root`), `test`, `lint`, `lint_ratchet`, `typecheck` y `build`. Si un comando es `null`, no aplica;
   - `env_hint`: qué sugerir si el entorno no responde. **Nunca** lo ejecutes tú.
 - **Constitución:** Parte I en `${CLAUDE_PLUGIN_ROOT}/constitution/base.md` (B5) y Parte II en `.sdd/constitution.md` (P1 forma de los esqueletos, **P2 arquitectura**, P3 seguridad).
-- **Ratchet de lint** (ámbitos con `lint_ratchet`): `node ${CLAUDE_PLUGIN_ROOT}/scripts/lint-ratchet.mjs <ámbito>` desde la raíz del repo (0 = sin violaciones nuevas, 1 = hay nuevas, 2 = linter no disponible).
+- **Ratchet de lint** (ámbitos con `lint_ratchet`): `node ${CLAUDE_PLUGIN_ROOT}/scripts/lint-ratchet.mjs <ámbito>` desde la raíz del repo, tal cual y sin comillas alrededor de la ruta, para que coincida con los permisos preautorizados (0 = sin violaciones nuevas, 1 = hay nuevas, 2 = linter no disponible).
 
 ## Modo `scaffold` (etapa `tests`)
 Si el orquestador te indica **Modo: scaffold**, este es tu único trabajo en esa invocación:

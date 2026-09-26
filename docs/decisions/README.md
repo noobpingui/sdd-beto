@@ -38,3 +38,4 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0023](ADR-0023-archivos-del-flujo-no-son-produccion.md) | `.sdd/`, `.claude/`, `CLAUDE.md`, `AGENTS.md`, `paths.specs` y `paths.adr` nunca son producción ni test |
 | [0024](ADR-0024-implementacion-init.md) | `init`: la IA decide y `sdd-init.mjs` escribe; `CLAUDE.md` con marcas y `@AGENTS.md`; límite de profundidad sí, marketplace opcional |
 | [0025](ADR-0025-git-guard-sin-ask.md) | El `git-guard` solo restringe a los subagentes; la sesión principal aprueba commits y pushes en el gate del chat |
+| [0026](ADR-0026-permisos-locales.md) | `init` propone reglas `allow` en `.claude/settings.local.json` para leer el plugin y ejecutar sus CLIs sin avisos |

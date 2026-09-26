@@ -3,6 +3,7 @@
 - **Estado:** Aceptada · 2026-09-25
 - **Decidido por:** Claude, con el usuario (opciones de `settings.json`)
 - **Detalla:** ADR-0018 (init), ADR-0013 (`CLAUDE.md`) y ADR-0001 (límite de profundidad)
+- **Ampliada por:** ADR-0026 (permisos locales: una tercera pregunta en el gate 4)
 - **Documentación consultada:** `skills`, `settings`, `settings-reference`, `env-vars` y `memory` (Claude Code v2.1.282)
 
 ## Contexto

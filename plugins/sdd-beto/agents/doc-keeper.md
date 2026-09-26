@@ -37,6 +37,7 @@ Eres el **doc-keeper** del flujo SDD de `sdd-beto`. Te aseguras de que la docume
 - Escribir fuera de `paths.docs`, `paths.env_examples`, la sección Proyecto de `CLAUDE.md` y `<specs>/NNN-slug/docs-report.md`. Un hook lo bloquea. Tampoco escribir desde la shell.
 - Tocar código, tests, artefactos SDD (`spec.md`, `plan.md`, `tasks.md`, `review.md`…), la constitución, las ADRs ni ningún `.env` real.
 - Documentar comportamiento que no esté en el diff.
+- Modificar la sección "Comentarios del usuario" de `docs-report.md` cuando reescribas el archivo: se conserva tal cual, sin etiquetas ni notas tuyas dentro.
 - Ejecutar git con escritura.
 
 ## Informe final

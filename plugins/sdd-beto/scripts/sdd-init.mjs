@@ -20,8 +20,9 @@ const USAGE = `Uso: node sdd-init.mjs <comando> [opciones]
   preview                       valida una config borrador (stdin) y muestra cómo clasifica el repo (solo lectura)
   write-config [--dry-run]      valida la config de stdin y la escribe en ${CONFIG_REL}
   integrate [--dry-run] [--project-section -] [--replace-project-section]
-            [--no-depth-limit] [--marketplace]
-                                carpetas de specs y ADRs, secciones de CLAUDE.md y .claude/settings.json
+            [--no-depth-limit] [--marketplace] [--local-permissions]
+                                carpetas de specs y ADRs, secciones de CLAUDE.md, .claude/settings.json
+                                y, con --local-permissions, .claude/settings.local.json
 
 Opciones comunes:
   --project <dir>               por defecto, la raíz git del directorio actual
@@ -31,6 +32,8 @@ export const SUPPORTED_SCHEMA = 1;
 export const SECTIONS = ['proyecto', 'sdd', 'aprobacion', 'convenciones'];
 export const SETTINGS_REL = '.claude/settings.json';
 export const DEPTH_VAR = 'CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH';
+export const LOCAL_SETTINGS_REL = '.claude/settings.local.json';
+const ALLOWED_SCRIPTS = ['sdd-state.mjs', 'lint-ratchet.mjs'];
 const SETTINGS_SCHEMA = 'https://json.schemastore.org/claude-code-settings.json';
 
 class InitError extends Error { constructor(m, code = 2) { super(m); this.code = code; } }
@@ -205,6 +208,7 @@ export function scan(dir) {
       claude_md: { exists: claudeMd !== null, sections: markerStatus(claudeMd) },
       agents_md: agentsMd,
       settings: settingsFacts(dir),
+      local_permissions: localPermissionFacts(dir),
     },
     risks,
   };
@@ -276,9 +280,11 @@ export function findSection(text, id) {
 const block = (id, body) => `${startMarker(id)}\n${body}\n${endMarker(id)}`;
 
 function scopesTable(config) {
-  const c = (v) => (v === null || v === undefined ? '—' : `\`${String(typeof v === 'object' ? v.cmd : v).replace(/\|/g, '\\|')}\``);
+  const c = (v) => (v === null || v === undefined ? '—' : `\`${String(v).replace(/\|/g, '\\|')}\``);
+  // El comando del ratchet lleva {file} y lee de stdin: no sirve para ejecutarlo a mano.
+  const lint = (cmds) => (cmds.lint ? c(cmds.lint) : cmds.lint_ratchet ? `ratchet (${cmds.lint_ratchet.format})` : '—');
   const rows = Object.entries(config.scopes).map(([n, s]) =>
-    `| \`${n}\` | \`${s.root}\` | ${c(s.commands.test)} | ${c(s.commands.lint_ratchet || s.commands.lint)} | ${c(s.commands.typecheck)} | ${c(s.commands.build)} |`);
+    `| \`${n}\` | \`${s.root}\` | ${c(s.commands.test)} | ${lint(s.commands)} | ${c(s.commands.typecheck)} | ${c(s.commands.build)} |`);
   return ['| Ámbito | Raíz | Test | Lint | Typecheck | Build |', '|---|---|---|---|---|---|', ...rows].join('\n');
 }
 
@@ -401,6 +407,64 @@ export function mergeSettings(previousText, { depthLimit = true, marketplace = f
   return { text: `${JSON.stringify(s, null, detectIndent(previousText && toLf(previousText)))}\n`, notes };
 }
 
+// ---------- .claude/settings.local.json: permisos del plugin (ADR-0026) ----------
+// Forma POSIX con la que Claude Code compara las reglas de ruta: C:\x\y → /c/x/y.
+export function posixPath(p) {
+  const fwd = p.split('\\').join('/');
+  const m = /^([A-Za-z]):\/(.*)$/.exec(fwd);
+  return m ? `/${m[1].toLowerCase()}/${m[2]}` : fwd;
+}
+
+// Reglas allow para leer el plugin y ejecutar sus CLIs sin avisos. En Windows se generan las dos formas de
+// la ruta (C:/… y C:\…), porque una regla Bash se compara con el texto literal del comando.
+export function localPermissionRules(root = PLUGIN_ROOT) {
+  const forms = [...new Set([root.split('\\').join('/'), root])];
+  const bash = forms.flatMap((r) => {
+    const sep = r.includes('\\') ? '\\' : '/';
+    return ALLOWED_SCRIPTS.map((script) => `Bash(node ${r}${sep}scripts${sep}${script} *)`);
+  });
+  return [`Read(/${posixPath(root)}/**)`, ...bash];
+}
+
+// ¿La generó init, para esta u otra versión del plugin? Permite sustituir las reglas de una versión anterior
+// al actualizar el plugin sin tocar las del usuario.
+export function isPluginRule(rule) {
+  if (/^Bash\(node .+[\\/]scripts[\\/](sdd-state|lint-ratchet)\.mjs \*\)$/.test(rule)) return true;
+  return /^Read\(\/\/.+\/\*\*\)$/.test(rule) && rule.split('/').includes('sdd-beto');
+}
+
+export function mergeLocalPermissions(previousText, rules = localPermissionRules()) {
+  let s = {};
+  if (previousText !== null) {
+    try { s = JSON.parse(toLf(previousText)); } catch (e) {
+      throw new InitError(`${LOCAL_SETTINGS_REL} no es JSON válido (${e.message}); corrígelo antes de integrar`);
+    }
+    if (s === null || typeof s !== 'object' || Array.isArray(s)) throw new InitError(`${LOCAL_SETTINGS_REL} debe ser un objeto JSON`);
+  }
+  const allow = Array.isArray(s.permissions?.allow) ? s.permissions.allow : [];
+  const stale = allow.filter((r) => isPluginRule(r) && !rules.includes(r));
+  const missing = rules.filter((r) => !allow.includes(r));
+  const notes = [
+    ...stale.map((r) => `se quita (otra versión del plugin): ${r}`),
+    ...missing.map((r) => `permissions.allow += ${r}`),
+  ];
+  if (notes.length) s.permissions = { ...(s.permissions || {}), allow: [...allow.filter((r) => !stale.includes(r)), ...missing] };
+  return { text: `${JSON.stringify(s, null, detectIndent(previousText && toLf(previousText)))}\n`, notes };
+}
+
+function localPermissionFacts(dir) {
+  const text = readText(path.join(dir, LOCAL_SETTINGS_REL));
+  if (text === null) return { exists: false };
+  let allow;
+  try { allow = JSON.parse(toLf(text)).permissions?.allow || []; } catch { return { exists: true, valid: false }; }
+  const current = localPermissionRules();
+  return {
+    exists: true, valid: true,
+    up_to_date: current.every((r) => allow.includes(r)),
+    stale: allow.filter((r) => isPluginRule(r) && !current.includes(r)).length,
+  };
+}
+
 // ---------- integrate ----------
 export function integrate(dir, opts = {}) {
   let config;
@@ -433,6 +497,25 @@ export function integrate(dir, opts = {}) {
       ? { path: SETTINGS_REL, action: 'unchanged' }
       : planFile(dir, SETTINGS_REL, settings.text, previousSettings);
     plans.push({ ...plan, notes: settings.notes });
+  }
+
+  // 4. .claude/settings.local.json (opcional), que git debe ignorar: lleva rutas de esta máquina.
+  if (opts.localPermissions) {
+    const previousLocal = readText(path.join(dir, LOCAL_SETTINGS_REL));
+    const local = mergeLocalPermissions(previousLocal);
+    const plan = local.notes.length === 0 && previousLocal !== null
+      ? { path: LOCAL_SETTINGS_REL, action: 'unchanged' }
+      : planFile(dir, LOCAL_SETTINGS_REL, local.text, previousLocal);
+    const notes = [...local.notes];
+    if (tryGit(['ls-files', '--error-unmatch', LOCAL_SETTINGS_REL], dir) !== null) {
+      notes.push(`${LOCAL_SETTINGS_REL} está versionado: sácalo del repo (git rm --cached), porque lleva rutas de esta máquina`);
+    } else if (tryGit(['check-ignore', '-q', LOCAL_SETTINGS_REL], dir) === null) {
+      const previousIgnore = readText(path.join(dir, '.gitignore'));
+      const base = previousIgnore === null ? '' : toLf(previousIgnore).replace(/\s*$/, '');
+      const next = `${base ? `${base}\n` : ''}${LOCAL_SETTINGS_REL}\n`;
+      plans.push({ ...planFile(dir, '.gitignore', next, previousIgnore), notes: [`.gitignore += ${LOCAL_SETTINGS_REL}`] });
+    }
+    plans.push({ ...plan, notes });
   }
 
   if (!opts.dryRun) applyPlan(dir, plans);
@@ -477,6 +560,7 @@ export function run(argv, { stdin = readStdin } = {}) {
           replaceProject: Boolean(opt['replace-project-section']),
           depthLimit: !opt['no-depth-limit'],
           marketplace: Boolean(opt.marketplace),
+          localPermissions: Boolean(opt['local-permissions']),
         }),
       };
     }

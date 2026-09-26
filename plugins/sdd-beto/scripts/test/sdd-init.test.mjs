@@ -6,7 +6,9 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { findSection, jsonDiff, mergeClaudeMd, pluginInfo, SECTIONS } from '../sdd-init.mjs';
+import {
+  findSection, isPluginRule, jsonDiff, localPermissionRules, mergeClaudeMd, mergeLocalPermissions, pluginInfo, posixPath, SECTIONS,
+} from '../sdd-init.mjs';
 
 const CLI = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'sdd-init.mjs');
 
@@ -30,6 +32,10 @@ function makeRepo(t) {
   git('config', 'user.email', 'test@example.invalid');
   git('config', 'user.name', 'test');
   git('config', 'core.autocrlf', 'false');
+  // Aísla los tests de los excludes globales de quien los ejecuta (Claude Code puede haber añadido ahí
+  // **/.claude/settings.local.json).
+  writeFileSync(path.join(dir, '.git', 'no-global-excludes'), '');
+  git('config', 'core.excludesFile', path.join(dir, '.git', 'no-global-excludes'));
   const r = {
     dir,
     git,
@@ -347,4 +353,91 @@ test('mergeClaudeMd: plantilla sin cambios y archivo vacío', () => {
   assert.equal(mergeClaudeMd(first.text, sections).text, first.text);
   const empty = mergeClaudeMd('', sections);
   assert.ok(empty.text.startsWith('<!-- sdd-beto:proyecto:start -->'));
+});
+
+test('integrate: la tabla de ámbitos muestra "ratchet (formato)" en lugar del comando con {file}', (t) => {
+  const r = makeRepo(t);
+  withConfig(r, {
+    schema_version: 1,
+    scopes: {
+      core: {
+        root: 'core', prod: ['core/**'], tests: ['core/tests/**'],
+        commands: { test: 'run-tests', lint_ratchet: { format: 'ruff', cmd: 'ruff check --stdin-filename {file} -' } },
+      },
+    },
+  });
+  r.cli(['integrate']);
+  const md = r.read('CLAUDE.md');
+  assert.match(md, /\| `core` \| `core` \| `run-tests` \| ratchet \(ruff\) \| — \| — \|/);
+  assert.doesNotMatch(md, /\{file\}/);
+});
+
+// ---------- permisos locales (ADR-0026) ----------
+test('localPermissionRules: lectura del plugin y sus CLIs, con las dos formas de ruta en Windows', () => {
+  const win = localPermissionRules(String.raw`C:\Tools\plugins\sdd-beto`);
+  assert.deepEqual(win, [
+    'Read(//c/Tools/plugins/sdd-beto/**)',
+    'Bash(node C:/Tools/plugins/sdd-beto/scripts/sdd-state.mjs *)',
+    'Bash(node C:/Tools/plugins/sdd-beto/scripts/lint-ratchet.mjs *)',
+    String.raw`Bash(node C:\Tools\plugins\sdd-beto\scripts\sdd-state.mjs *)`,
+    String.raw`Bash(node C:\Tools\plugins\sdd-beto\scripts\lint-ratchet.mjs *)`,
+  ]);
+  assert.deepEqual(localPermissionRules('/opt/sdd-beto'), [
+    'Read(//opt/sdd-beto/**)',
+    'Bash(node /opt/sdd-beto/scripts/sdd-state.mjs *)',
+    'Bash(node /opt/sdd-beto/scripts/lint-ratchet.mjs *)',
+  ]);
+  assert.equal(posixPath(String.raw`D:\a\b`), '/d/a/b');
+  for (const rule of win) assert.ok(isPluginRule(rule), rule);
+  assert.ok(!isPluginRule('Read(//c/Tools/other/**)'));
+  assert.ok(!isPluginRule('Bash(node scripts/build.mjs *)'));
+});
+
+test('mergeLocalPermissions: añade las reglas, sustituye las de otra versión y respeta las del usuario', () => {
+  const v1 = localPermissionRules('/p/sdd-beto/0.1.0');
+  const v2 = localPermissionRules('/p/sdd-beto/0.2.0');
+  const first = mergeLocalPermissions(JSON.stringify({ permissions: { allow: ['Bash(npm test)'] }, other: 1 }), v1);
+  const s1 = JSON.parse(first.text);
+  assert.deepEqual(s1.permissions.allow, ['Bash(npm test)', ...v1]);
+  assert.equal(s1.other, 1);
+  assert.deepEqual(mergeLocalPermissions(first.text, v1).notes, []);
+  const upgraded = mergeLocalPermissions(first.text, v2);
+  assert.deepEqual(JSON.parse(upgraded.text).permissions.allow, ['Bash(npm test)', ...v2]);
+  assert.equal(upgraded.notes.filter((n) => n.startsWith('se quita')).length, v1.length);
+});
+
+test('integrate --local-permissions: escribe settings.local.json y lo añade a .gitignore; reejecutar no cambia nada', (t) => {
+  const r = makeRepo(t);
+  withConfig(r);
+  r.write('.gitignore', 'node_modules/\r\n');
+  const dry = r.cli(['integrate', '--no-depth-limit', '--local-permissions', '--dry-run']);
+  assert.equal(dry.code, 0, dry.stderr);
+  assert.ok(!r.exists('.claude/settings.local.json'));
+  assert.ok(dry.data.files.find((f) => f.path === '.gitignore').notes.length);
+
+  const res = r.cli(['integrate', '--no-depth-limit', '--local-permissions']);
+  assert.equal(res.code, 0, res.stderr);
+  assert.deepEqual(JSON.parse(r.read('.claude/settings.local.json')).permissions.allow, localPermissionRules());
+  assert.equal(r.read('.gitignore'), 'node_modules/\r\n.claude/settings.local.json\r\n');
+  assert.equal(r.git('check-ignore', '.claude/settings.local.json').trim(), '.claude/settings.local.json');
+  assert.ok(!r.exists('.claude/settings.json'), '--no-depth-limit no crea settings.json');
+
+  const again = r.cli(['integrate', '--no-depth-limit', '--local-permissions']);
+  assert.ok(again.data.files.every((f) => f.action === 'unchanged'), JSON.stringify(again.data.files));
+  assert.ok(!again.data.files.some((f) => f.path === '.gitignore'), 'ya lo ignora: no toca .gitignore');
+
+  const scan = r.cli(['scan']).data.sdd.local_permissions;
+  assert.deepEqual(scan, { exists: true, valid: true, up_to_date: true, stale: 0 });
+});
+
+test('integrate --local-permissions: avisa si settings.local.json está versionado y no toca .gitignore', (t) => {
+  const r = makeRepo(t);
+  withConfig(r);
+  r.write('.claude/settings.local.json', '{}');
+  r.git('add', '-f', '.claude/settings.local.json');
+  r.git('commit', '-q', '-m', 'local');
+  const res = r.cli(['integrate', '--no-depth-limit', '--local-permissions']);
+  const f = res.data.files.find((x) => x.path === '.claude/settings.local.json');
+  assert.ok(f.notes.some((n) => n.includes('versionado')));
+  assert.ok(!r.exists('.gitignore'));
 });

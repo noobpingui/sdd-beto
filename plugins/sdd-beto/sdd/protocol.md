@@ -3,7 +3,7 @@
 Lectura obligatoria para todas las skills `/sdd-beto:*` de flujo. Lo ejecuta **la sesión principal**, nunca un subagente (ADR-0001). La tabla de etapas está en `stages.md`, en esta misma carpeta.
 
 **Convenciones de este documento:**
-- `sdd-state <comando>` es la CLI de estado. La ruta exacta viene en el bloque "Rutas del plugin" de la skill que te trajo aquí. Ejecútala siempre como `node <ruta>/sdd-state.mjs <comando> …`, **sin comillas alrededor de la ruta**, para que coincida con el permiso preautorizado de la skill.
+- `sdd-state <comando>` es la CLI de estado. La ruta exacta viene en el bloque "Rutas del plugin" de la skill que te trajo aquí. Ejecútala siempre como `node <ruta>/sdd-state.mjs <comando> …`, **sin comillas alrededor de la ruta**, para que coincida con los permisos preautorizados (los de la skill y los que propone init, ADR-0026). Por la misma razón, **no la guardes en variables de shell** (`S="node …"; $S …`) y no la encadenes con comandos que escriban: las reglas de permisos se comparan con el texto literal de cada comando. Encadenar con `cd` dentro del proyecto o con comandos de solo lectura sí es compatible.
 - "La config" es `.sdd/config.json` del proyecto. `<specs>` es `paths.specs` (por defecto `specs/`).
 - "La constitución" son sus dos partes: la base del plugin (bloque "Rutas del plugin") y `.sdd/constitution.md` del proyecto.
 - **Idioma:** hablas con el usuario, y escribes lo que copies en los artefactos, en el `language` de la config.
@@ -17,6 +17,7 @@ Lectura obligatoria para todas las skills `/sdd-beto:*` de flujo. Lo ejecuta **l
 3. **Nada avanza sin la aprobación explícita del usuario.** Son aprobación "aprobado", "sí", "ok, sigue" o equivalentes claros. **No** lo son el silencio, un "mmm", una pregunta o un "luego vemos". Ante la duda, se pregunta.
 4. **Una etapa por aprobación.** Nunca se encadena la siguiente etapa sin gate, ni se agrupan varias etapas en una sola aprobación.
 5. **Si la config no existe o no es válida**, `sdd-state` lo dice: detente y sugiere `/sdd-beto:init`.
+6. **Una interrupción no es una instrucción del usuario.** Un "[Request interrupted by user]" en una delegación puede generarlo el entorno (un corte de conexión, un tiempo de espera). No digas que el usuario lo pidió: informa de que la delegación se interrumpió y pregunta si se relanza. La etapa sigue en `in_progress` y se reanuda con la misma delegación.
 
 ## 1. Resolver la feature
 - Con argumento (`NNN-slug` o solo `NNN`): pásalo a la CLI con `--feature <arg>`.
@@ -34,6 +35,7 @@ Lectura obligatoria para todas las skills `/sdd-beto:*` de flujo. Lo ejecuta **l
      ```
      Feature: <specs>/NNN-slug/  ·  Etapa: <etapa>  ·  Modo: <scaffold|red|full|->  ·  Iteración: <n>/<max>
      Lee tus entradas según tu definición. Hallazgos a corregir (si aplica): <specs>/NNN-slug/<verify-report.md|review.md>, ítems <F1, F3…>
+     No edites la columna "Respuesta del usuario" ni las secciones "Comentarios del usuario": consérvalas tal cual, sin etiquetas ni notas; las tuyas van fuera.
      Tu mensaje final debe ser EXACTAMENTE el bloque "Informe final" de tu definición.
      ```
 4. Lee el **informe final** (`STATUS / ARTIFACTS / SUMMARY / …`) y **comprueba en disco** que los artefactos existen. No te fíes solo del informe.

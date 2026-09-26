@@ -67,6 +67,7 @@ Cada proyecto tiene `.sdd/config.json`, generado por `/sdd-beto:init` y versiona
   - **producción** si coincide con algún `scopes.*.prod` y no es test, ni un `paths.env_examples`, ni un `README.md`;
   - todo lo demás no es ni producción ni test (p. ej. configuración del repo), y el guard no lo restringe para la sesión principal.
 - **Comandos:** cadenas que se ejecutan con la shell desde `scopes.<ámbito>.root`. `{files}` se sustituye por las rutas relativas a `root`; `{file}`, por una sola. `null` = no aplica. `test_check` comprueba que los tests nuevos se recolectan o compilan sin exigir que pasen.
+  - **Añadido tras la Fase 6:** un comando debe funcionar tanto en la shell del sistema (`cmd.exe` en Windows, que usa `lint-ratchet`) como en Bash o PowerShell (que usan los agentes). En la práctica: rutas a ejecutables entre comillas dobles y nada de sintaxis exclusiva de una shell. Lo detalla `skills/init/analysis.md` §4.
 - **`env_hint`:** lo que el `verifier` y el `implementer` sugieren al usuario cuando el entorno no responde. **Nunca lo ejecutan.**
 - **`scope` de una feature** en `state.json` es la lista de nombres de ámbitos que toca (p. ej. `["api"]`), en lugar de booleanos fijos.
 - **Validación:** los scripts del plugin validan la config al cargarla y, si no es válida, el error dice qué campo falla. Se publicará un JSON Schema en `templates/` para autocompletado en el editor.

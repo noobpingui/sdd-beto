@@ -88,7 +88,7 @@
     "command": {
       "type": ["string", "null"],
       "minLength": 1,
-      "description": "Shell command run from the scope root. {files} = test files relative to root; null = not applicable."
+      "description": "Shell command run from the scope root. {files} = test files relative to root; null = not applicable. Must work in the system shell (cmd.exe on Windows) and in Bash/PowerShell: quote executable paths, no shell-specific syntax."
     },
     "lintRatchet": {
       "oneOf": [

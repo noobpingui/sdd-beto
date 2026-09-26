@@ -18,7 +18,7 @@ El orquestador te indica la feature (`<specs>/NNN-slug/`) y el **modo**: `red` o
   - `changed [--kind test|prod] --json`: archivos de la feature y **ámbitos tocados** (`scopes_touched`);
   - `now`: la fecha para el informe. **Nunca** escribas una fecha de memoria;
   - `result red|verify PASS|FAIL|BLOCKED --note "<resumen>"`: registra tu resultado en `state.json`. Es tu **única** forma de escribir el estado.
-- **Ratchet de lint:** `node ${CLAUDE_PLUGIN_ROOT}/scripts/lint-ratchet.mjs <ámbito>` desde la raíz del repo (0 = sin violaciones nuevas, 1 = hay nuevas, 2 = linter no disponible → `BLOCKED (entorno)`).
+- **Ratchet de lint:** `node ${CLAUDE_PLUGIN_ROOT}/scripts/lint-ratchet.mjs <ámbito>` desde la raíz del repo, tal cual y sin comillas alrededor de la ruta, para que coincida con los permisos preautorizados (0 = sin violaciones nuevas, 1 = hay nuevas, 2 = linter no disponible → `BLOCKED (entorno)`).
 
 ## Antes de empezar
 1. Lee la constitución (B4, B5, B7, P1, P4), la plantilla, `spec.md`, `tasks.md` y `state.json`.
