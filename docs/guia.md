@@ -58,6 +58,17 @@ No confundas las ADRs de tu proyecto con las del plugin. Las del repositorio `sd
 
 **Reejecutar `init`** es seguro: entra en modo actualización, propone solo lo que cambió y, si no hay nada, no produce diff. Hazlo después de actualizar el plugin o cuando el repo cambie de estructura (un ámbito nuevo, otro comando de test…).
 
+### Proyecto nuevo desde cero
+`init` deduce la config y la constitución **observando** el proyecto: los manifiestos, el CI, los tests y el código. En un repo vacío no hay nada que observar, y además crear el esqueleto del proyecto no es una feature (no hay comportamiento que probar), así que el `stage-guard` lo bloquearía. El orden recomendado es:
+
+1. **Crea la base sin el flujo SDD**, con Claude Code normal: `git init`, el framework, la estructura de carpetas, el runner de tests con **un test de ejemplo que pase**, el linter y un README. Haz commit. Es un *walking skeleton*: el proyecto mínimo que arranca y se testea.
+2. **Ejecuta `/sdd-beto:init`.** Ya hay evidencia: detectará los ámbitos, el comando de test y el linter. La constitución saldrá corta, y es normal: amplíala con ADRs del proyecto a medida que se definan sus convenciones.
+3. **Desde ahí, cada funcionalidad pasa por el flujo** (`/sdd-beto:new` → `/sdd-beto:run`).
+
+Regla práctica: lo que no tiene comportamiento (la infraestructura) va antes; lo que tiene comportamiento (las features) va con el flujo. Si más adelante añades infraestructura nueva (un ámbito, otro servicio), prepárala igual y reejecuta `init`.
+
+*Este escenario aún no se ha probado de principio a fin; la prueba en seco partió de un proyecto con código y tests.*
+
 ## 4. Una feature de principio a fin
 
 ### Crear la feature

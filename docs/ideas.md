@@ -27,6 +27,7 @@ Origen de cada idea: **v1** = aplazada por la [ADR-0021](decisions/ADR-0021-alca
 |---|---|---|
 | **Plantilla de CI genérica**: tests, lint, typecheck y build de cada ámbito en las ramas de feature | Los comandos ya están en `.sdd/config.json`; `init` podría proponerla | v1 |
 | **Activar el plugin solo en los proyectos que lo usan**: desactivarlo a nivel de usuario (`enabledPlugins: false` en `~/.claude/settings.json`) y que `init` proponga `enabledPlugins: true` en el `.claude/settings.json` del proyecto, que tiene prioridad sobre el del usuario | Instalado a nivel de usuario, `claude plugin details` estima unos 2150 tokens fijos en **cada** sesión, también en proyectos sin SDD (las descripciones de agentes y comandos). Cambia comodidad por ahorro: hay que acordarse de activarlo en cada proyecto | 0.1.0 |
+| **Modo de `init` para repos vacíos**: detectar que no hay manifiestos ni tests, explicar el orden recomendado (esqueleto primero) y, opcionalmente, proponer una config y una constitución mínimas a partir del stack que elija el usuario | Hoy `init` solo observa lo que existe; en un repo vacío casi todo serían preguntas. La guía (§3, "Proyecto nuevo desde cero") documenta el orden a mano. Escenario sin probar | 0.1.0 |
 | **Probar el plugin en macOS y Linux** | Los scripts son Node puro, pero solo se ha probado en Windows 11 | F6 |
 | **Prueba en seco interactiva** y con una feature que toque dos ámbitos | La Fase 6 fue headless y la feature tocó un solo ámbito | F6 |
 
