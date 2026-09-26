@@ -33,7 +33,7 @@ Si solo hay evidencia de tipo 4, propón el comando habitual de esa herramienta 
 | Node · jest | script `test` | `npx jest {files}` | `npx jest --listTests {files}` |
 | Node · node:test | script `test` | `node --test {files}` | `null` (no hay forma fiable de recolectar sin ejecutar) |
 | Python · pytest | `python -m pytest -q` | `python -m pytest -q {files}` | `python -m pytest --collect-only -q {files}` |
-| Go | `go test ./...` | `null` (los tests se agrupan por paquete, no por archivo) | `go test -run '^
+| Go | `go test ./...` | `null` (los tests se agrupan por paquete, no por archivo) | `go test -run '^$' ./...` (compila sin ejecutar) |
 | Rust | `cargo test` | `null` (el filtro va por nombre, no por archivo) | `cargo test --no-run` |
 | JVM · Maven / Gradle | `mvn -q test` / `./gradlew test` | `null` (el filtro va por clase) | `mvn -q test-compile` / `./gradlew testClasses` |
 | .NET | `dotnet test` | `null` (el filtro va por nombre) | `dotnet build` del proyecto de tests |
@@ -41,52 +41,6 @@ Si solo hay evidencia de tipo 4, propón el comando habitual de esa herramienta 
 | PHP · PHPUnit | `vendor/bin/phpunit` | `vendor/bin/phpunit {files}` | `vendor/bin/phpunit --list-tests` |
 
 - `test_files` es opcional: si el ecosistema no filtra por archivo, `null`. En el red check, el `verifier` ejecuta entonces `test` y busca los tests nuevos por su nombre.
-- Si el script `test` del manifiesto ejecuta en modo *watch* (p. ej. `vitest` sin `run`), propón la variante que termina (`npx vitest run`).
-- `test_check` debe fallar si un test nuevo no compila o no se recolecta, y **no** debe exigir que pase. Si el ecosistema no tiene nada así, `null`.
-- `typecheck`: `npx tsc --noEmit` o `npx tsc -b`, `mypy`, `pyright`… solo si el repo los usa.
-- `build`: solo si el proyecto tiene un paso de build real. No lo ejecutes durante init.
-
-### Lint con ratchet (ADR-0009)
-El ratchet solo cuenta violaciones **nuevas**. Necesita un linter con salida JSON y que lea el archivo por stdin:
-
-| `format` | `cmd` |
-|---|---|
-| `ruff` | `python -m ruff check --output-format json --stdin-filename {file} -` (o `ruff check …` si se invoca así en el repo) |
-| `eslint` | `npx eslint --format json --stdin --stdin-filename {file}` |
-
-Si el repo usa otro linter, usa `lint` (el comando normal, que debe pasar sin errores) y deja `lint_ratchet` en `null`. Si el lint tiene mucha deuda previa, `lint_ratchet` es la opción que no bloquea el flujo.
-
-## 5. Estado de los tests y `env_hint`
-- Busca lo que necesitan los tests para ejecutarse: servicios en `docker-compose*`, variables de `.env.example`, bases de datos de prueba, datos semilla. El CI suele declararlo (`services:`, pasos previos).
-- `env_hint` es una indicación para el usuario, en una línea: "levanta la base de datos con `docker compose up -d db`", "copia `.env.example` a `.env`". **Nunca** se ejecuta.
-- En el paso 2 solo se ejecutan los `test_check` que no necesiten nada de esto, y con permiso.
-
-## 6. Constitución del proyecto: qué observar
-- **P1 · Tests:** ubicación y nombre de los archivos, fixtures compartidas, cómo se aíslan las dependencias (fakes escritos a mano, mocks de la librería, contenedores), idioma de los nombres de test, qué servicios usan los tests de integración.
-- **P1 · Forma de los esqueletos (Art. B5.6):** fíjala por lenguaje, con el mensaje exacto `not implemented`. Por ejemplo:
-
-  | Lenguaje | Cuerpo de un esqueleto |
-  |---|---|
-  | TypeScript / JavaScript | `throw new Error("not implemented");`, con parámetros `_nombre` |
-  | Python | `raise NotImplementedError("not implemented")`; `__init__` guarda las dependencias sin lanzar |
-  | Go | `panic("not implemented")` |
-  | Rust | `unimplemented!("not implemented")` o `todo!("not implemented")` |
-  | Java / Kotlin | `throw new UnsupportedOperationException("not implemented");` / `TODO("not implemented")` |
-  | C# | `throw new NotImplementedException("not implemented");` |
-  | Ruby | `raise NotImplementedError, "not implemented"` |
-  | PHP | `throw new \LogicException('not implemented');` |
-
-  Si el proyecto ya tiene su propia convención, se respeta siempre que el mensaje sea `not implemented`.
-- **P2 · Arquitectura:** capas o módulos y qué puede importar a qué, dónde viven la validación, la lógica de negocio y el acceso a datos, cómo se inyectan las dependencias, cómo se representan los errores, migraciones de datos y utilidades que ya existen y deben reutilizarse.
-- **P3 · Seguridad:** cómo se autentica y autoriza (decoradores, middleware, guards), cómo se validan las entradas, dónde viven los secretos y cómo se accede a los datos (ORM, consultas parametrizadas).
-- Lee 2 o 3 archivos representativos por ámbito antes de escribir una regla. Una regla que el código actual incumple de forma generalizada no es una convención: pregúntala.
- ./...` (compila sin ejecutar) |
-| Rust | `cargo test` | `cargo test` (el filtro va por nombre, no por archivo) | `cargo test --no-run` |
-| JVM · Maven / Gradle | `mvn -q test` / `./gradlew test` | según el plugin de test | `mvn -q test-compile` / `./gradlew testClasses` |
-| .NET | `dotnet test` | `dotnet test` con filtro | `dotnet build` del proyecto de tests |
-| Ruby · RSpec | `bundle exec rspec` | `bundle exec rspec {files}` | `bundle exec rspec --dry-run {files}` |
-| PHP · PHPUnit | `vendor/bin/phpunit` | `vendor/bin/phpunit {files}` | `vendor/bin/phpunit --list-tests` |
-
 - Si el script `test` del manifiesto ejecuta en modo *watch* (p. ej. `vitest` sin `run`), propón la variante que termina (`npx vitest run`).
 - `test_check` debe fallar si un test nuevo no compila o no se recolecta, y **no** debe exigir que pase. Si el ecosistema no tiene nada así, `null`.
 - `typecheck`: `npx tsc --noEmit` o `npx tsc -b`, `mypy`, `pyright`… solo si el repo los usa.

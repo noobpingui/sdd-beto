@@ -60,6 +60,6 @@ Cada fase tiene su gate, su commit y su push, todos con aprobación.
 | 3 | Portar y parametrizar agentes, skills, protocolo y plantillas (entregas 3a–3d) | hecha |
 | 4 | Portar y parametrizar los hooks con sus tests; ratchet de lint genérico (entregas 4a–4b) | hecha |
 | 5 | `/sdd-beto:init`: skill guiada y ayudante `sdd-init` (entregas 5a–5b) | hecha |
-| 6 | Prueba en seco en un proyecto de prueba neutral | pendiente |
+| 6 | Prueba en seco en un proyecto de prueba neutral (`docs/06-prueba-en-seco.md`) | hecha |
 | 7 | Migración del proyecto de origen al plugin, en una rama de ese repo | pendiente |
 | 8 | Documentación (README, instalación, guía, changelog) y borrado de `docs/BRIEF.md` | pendiente |
