@@ -2,7 +2,7 @@
 
 Lista viva de lo que podría entrar en versiones futuras del plugin. Nada de esto está decidido: cuando una idea se vaya a hacer, se escribe primero su ADR (o la que sustituya a una existente) y se quita de aquí.
 
-Origen de cada idea: **v1** = aplazada por la [ADR-0021](decisions/ADR-0021-alcance-v1.md) · **F6** = hallazgo de la [prueba en seco](06-prueba-en-seco.md).
+Origen de cada idea: **v1** = aplazada por la [ADR-0021](decisions/ADR-0021-alcance-v1.md) · **F6** = hallazgo de la [prueba en seco](06-prueba-en-seco.md) · **0.1.0** = observada al instalar la versión publicada.
 
 ## Flujo
 
@@ -26,6 +26,7 @@ Origen de cada idea: **v1** = aplazada por la [ADR-0021](decisions/ADR-0021-alca
 | Idea | Motivo | Origen |
 |---|---|---|
 | **Plantilla de CI genérica**: tests, lint, typecheck y build de cada ámbito en las ramas de feature | Los comandos ya están en `.sdd/config.json`; `init` podría proponerla | v1 |
+| **Activar el plugin solo en los proyectos que lo usan**: desactivarlo a nivel de usuario (`enabledPlugins: false` en `~/.claude/settings.json`) y que `init` proponga `enabledPlugins: true` en el `.claude/settings.json` del proyecto, que tiene prioridad sobre el del usuario | Instalado a nivel de usuario, `claude plugin details` estima unos 2150 tokens fijos en **cada** sesión, también en proyectos sin SDD (las descripciones de agentes y comandos). Cambia comodidad por ahorro: hay que acordarse de activarlo en cada proyecto | 0.1.0 |
 | **Probar el plugin en macOS y Linux** | Los scripts son Node puro, pero solo se ha probado en Windows 11 | F6 |
 | **Prueba en seco interactiva** y con una feature que toque dos ámbitos | La Fase 6 fue headless y la feature tocó un solo ámbito | F6 |
 
