@@ -29,7 +29,7 @@ Cada etapa la ejecuta un subagente con permisos separados, la sesión principal 
    - los ejemplos y fixtures de prueba son neutrales e inventados.
 2. **El harness de origen es un consumidor, no una referencia.** Mientras se porta el código (Fases 0–4), la sesión puede abrirse con `--add-dir` hacia el repositorio de origen para leerlo. Después se trabaja solo en este repo, y el proyecto de origen adopta el plugin como cualquier otro.
 3. **Las ADRs se redactan de forma genérica**, como decisiones propias de `sdd-beto`, sin referencias a ningún proyecto.
-4. **`docs/BRIEF.md` es temporal.** Se borra con un commit cuando su contenido ya viva en las ADRs, en este archivo y en la documentación del plugin (criterio de "hecho" de la Fase 8). Al cerrar la Fase 8, `grep -ri <nombre-del-proyecto-de-origen>` solo puede encontrar coincidencias en el changelog, como nota histórica.
+4. **El brief de traspaso ya no existe.** `docs/BRIEF.md` se borró en la Fase 8, cuando su contenido ya vivía en las ADRs, en este archivo, en la documentación y en [`docs/ideas.md`](docs/ideas.md); queda en el historial de git. `grep -ri <nombre-del-proyecto-de-origen>` no debe encontrar nada en el repo.
 
 ## Reglas de trabajo con el usuario: obligatorias
 
@@ -61,5 +61,5 @@ Cada fase tiene su gate, su commit y su push, todos con aprobación.
 | 4 | Portar y parametrizar los hooks con sus tests; ratchet de lint genérico (entregas 4a–4b) | hecha |
 | 5 | `/sdd-beto:init`: skill guiada y ayudante `sdd-init` (entregas 5a–5b) | hecha |
 | 6 | Prueba en seco en un proyecto de prueba neutral (`docs/06-prueba-en-seco.md`) | hecha |
-| 7 | Migración del proyecto de origen al plugin, en una rama de ese repo | pendiente |
+| 7 | Migración del proyecto de origen al plugin | fuera de alcance: se hará desde ese proyecto, que es independiente (ADR-0027) |
 | 8 | Documentación (README, instalación, guía, changelog) y borrado de `docs/BRIEF.md` | pendiente |

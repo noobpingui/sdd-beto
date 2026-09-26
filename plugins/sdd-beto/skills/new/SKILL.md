@@ -24,7 +24,7 @@ Lee primero el protocolo (§0 y §4) y `.sdd/config.json`. Si la config no exist
    - El árbol de trabajo está limpio (`git status --porcelain` vacío). Si no, muestra lo pendiente y detente.
    - La rama actual es `base_branch` de la config. Si no, avisa y pregunta si se parte de ella o de la rama actual. La rama de partida será la base de la feature: todos los agentes comparan contra ella.
 3. **Proponer**, sin ejecutar nada todavía:
-   - **Tipo:** `feature`, `fix` o `refactor`, según la idea.
+   - **Tipo:** `feature`, `fix` o `refactor`, según la idea. Si propones `refactor`, avisa de que en esta versión el flujo es el mismo: el red check exige tests nuevos que fallen, así que un refactor puro, sin comportamiento nuevo, no puede superarlo. En ese caso sugiere hacerlo fuera del flujo (el Art. B1.1 solo exige el flujo para cambios de comportamiento): reiniciar con `SDD_BYPASS=1`, porque el stage-guard bloquea la producción fuera de una feature, mantener los tests existentes en verde y aprobar el commit a mano.
    - **Ámbitos:** los de `scopes` de la config que tocará, según la idea.
    - **Número, carpeta y rama:** `sdd-state next <slug> --type <tipo>` (falla si el slug ya existe).
    - **Título:** una línea que resuma la idea.

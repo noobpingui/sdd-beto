@@ -27,7 +27,7 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | ADR | Decisión |
 |---|---|
 | [0014](ADR-0014-estructura-y-distribucion.md) | Repo = marketplace; plugin en `plugins/sdd-beto/` |
-| [0015](ADR-0015-versiones.md) | Semver fijado en `plugin.json`, tags `sdd-beto--v*` y changelog |
+| [0015](ADR-0015-versiones.md) | Semver fijado en `plugin.json`, tags `sdd-beto--v*` y changelog (criterio de la 1.0.0 sustituido por la 0027) |
 | [0016](ADR-0016-config-proyecto.md) | `.sdd/config.json`: ámbitos con globs y comandos, rutas y modelos |
 | [0017](ADR-0017-constitucion-y-plantillas.md) | Constitución base (B1–B7) + parte del proyecto (P1–P4); plantillas sobrescribibles |
 | [0018](ADR-0018-init.md) | `/sdd-beto:init` guiado, con un gate por paso e idempotente |
@@ -39,3 +39,4 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0024](ADR-0024-implementacion-init.md) | `init`: la IA decide y `sdd-init.mjs` escribe; `CLAUDE.md` con marcas y `@AGENTS.md`; límite de profundidad sí, marketplace opcional |
 | [0025](ADR-0025-git-guard-sin-ask.md) | El `git-guard` solo restringe a los subagentes; la sesión principal aprueba commits y pushes en el gate del chat |
 | [0026](ADR-0026-permisos-locales.md) | `init` propone reglas `allow` en `.claude/settings.local.json` para leer el plugin y ejecutar sus CLIs sin avisos |
+| [0027](ADR-0027-criterio-1-0.md) | 0.1.0 al cerrar la Fase 8; 1.0.0 cuando un proyecto real complete una feature con el plugin instalado |

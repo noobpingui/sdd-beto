@@ -18,6 +18,8 @@ Los roles de juicio (especificar, diseñar, revisar) y los mecánicos (descompon
 
 - **Sobrescritura por proyecto:** `models.<agente>` en `.sdd/config.json`. Si existe, el orquestador lo pasa como `model` al delegar.
 
+**Evaluado en la Fase 6** (ADR-0021): el `verifier` con haiku respetó el formato del informe final y generó las fechas con `sdd-state now` en sus tres informes de la prueba en seco. Se mantiene haiku.
+
 ## Consecuencias
 - (+) Equilibrio entre coste, velocidad y calidad, ajustable sin tocar el plugin.
 - (−) Con `haiku`, el `verifier` tiende a ignorar el formato del informe y a inventar fechas. Se mitiga exigiendo el formato en el prompt de delegación y obteniendo las fechas con un comando. En la prueba en seco (Fase 6) se evalúa si el valor por defecto debe ser `sonnet`.

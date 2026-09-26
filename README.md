@@ -78,6 +78,7 @@ Después de actualizar, reejecuta `/sdd-beto:init` en cada proyecto: entra en mo
 - [Guía de uso](docs/guia.md): adopción, una feature de principio a fin, gates, correcciones y solución de problemas.
 - [Decisiones de diseño (ADRs)](docs/decisions/README.md).
 - [Informe de la prueba en seco](docs/06-prueba-en-seco.md): el flujo completo ejecutado con un modelo real.
+- [Ideas y mejoras pendientes](docs/ideas.md).
 
 ## Desarrollo del plugin
 - Estructura: la raíz es el marketplace y el plugin vive en `plugins/sdd-beto/` (ADR-0014).

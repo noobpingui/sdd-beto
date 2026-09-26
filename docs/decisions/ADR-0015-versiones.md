@@ -2,6 +2,7 @@
 
 - **Estado:** Aceptada · 2026-09-25
 - **Decidido por:** usuario (P2 de `docs/00-discovery.md`)
+- **Sustituida en parte por:** ADR-0027 (criterio para publicar la 1.0.0)
 - **Documentación consultada:** `plugins/loading` → *Versions and updates*, `plugins/host-marketplace` (Claude Code v2.1.282)
 
 ## Contexto
@@ -15,7 +16,7 @@
 - **Tag por release:** `sdd-beto--v<versión>` (la convención que la doc usa para resolver dependencias entre plugins).
 - **`CHANGELOG.md`** en formato *Keep a Changelog*.
 - **Qué es un cambio mayor:** un cambio incompatible en el esquema de `.sdd/config.json` o de `state.json`, en las rutas o nombres de comandos y agentes, o en el significado de un artículo de la constitución base. Cada esquema lleva `schema_version`; si sube, el changelog explica la migración y `/sdd-beto:init` la propone.
-- **Versión inicial `0.1.0`.** Se publica `1.0.0` cuando un proyecto real haya migrado sin perder funcionalidad (Fase 7).
+- **Versión inicial `0.1.0`.** ~~Se publica `1.0.0` cuando un proyecto real haya migrado sin perder funcionalidad (Fase 7).~~ Sustituido por la ADR-0027: la 1.0.0 llega cuando un proyecto real complete una feature con el plugin instalado desde el marketplace.
 - **Durante el desarrollo** no se sube versión en cada commit: se prueba con el plugin cargado en sitio.
 
 ## Consecuencias

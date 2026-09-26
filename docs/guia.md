@@ -66,6 +66,8 @@ No confundas las ADRs de tu proyecto con las del plugin. Las del repositorio `sd
 ```
 Propone el tipo (`feature`, `fix` o `refactor`), los ámbitos que toca, el número y la rama (`feat/NNN-slug`). Con tu aprobación crea la rama, `state.json` e `idea.md` con tu idea literal. No hace commit: esos archivos entran en el de la spec.
 
+**Limitación del tipo `refactor`:** en esta versión solo cambia el prefijo de la rama; el flujo es el mismo. El red check exige tests nuevos que **fallen** antes de implementar, así que un refactor puro, sin comportamiento nuevo, no puede superarlo. Si el refactor añade o cambia comportamiento, los tests de ese comportamiento sirven. Si no, hazlo fuera del flujo: el Art. B1.1 solo exige el flujo para cambios de comportamiento. Como el `stage-guard` bloquea la edición de producción fuera de una feature, reinicia Claude Code con `SDD_BYPASS=1` (§7), mantén los tests existentes en verde y aprueba el commit como cualquier otro. El modo refactor con tests de caracterización está en [ideas](ideas.md).
+
 ### Recorrer el flujo
 ```
 /sdd-beto:run [NNN-slug]
