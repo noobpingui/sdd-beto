@@ -187,9 +187,10 @@ test('detecta subcomandos git con opciones globales', () => {
   assert.deepEqual(gitSubcommands('npm run build'), []);
 });
 
-test('la sesión principal: commit y push piden confirmación; el resto pasa', () => {
-  assert.equal(shell(null, 'git commit -m "x"').decision, 'ask');
-  assert.equal(shell(null, 'git push -u origin feat/001-demo').decision, 'ask');
+test('la sesión principal: el git-guard no decide; la aprobación es el gate del chat (ADR-0025)', () => {
+  assert.equal(shell(null, 'git commit -m "x"'), null);
+  assert.equal(shell(null, 'git push -u origin feat/001-demo'), null);
+  assert.equal(shell(null, 'git merge --no-ff feat/001-demo'), null);
   assert.equal(shell(null, 'git status --short'), null);
   assert.equal(shell(null, 'git checkout -b feat/001-demo'), null);
 });
@@ -221,9 +222,13 @@ test('el proceso responde con JSON de hook válido y encuentra la config desde u
     encoding: 'utf8', env: { ...process.env, SDD_BYPASS: '', ...env },
   });
 
-  const ask = run('shell', { tool_input: { command: 'git push' } }, { CLAUDE_PROJECT_DIR: dir });
-  assert.equal(ask.status, 0);
-  assert.equal(JSON.parse(ask.stdout).hookSpecificOutput.permissionDecision, 'ask');
+  // Sesión principal: sin decisión, sin salida (flujo normal de permisos).
+  const main = run('shell', { tool_input: { command: 'git push' } }, { CLAUDE_PROJECT_DIR: dir });
+  assert.equal(main.status, 0);
+  assert.equal(main.stdout, '');
+  // Un subagente sigue bloqueado por el proceso real.
+  const sub = run('shell', { agent_type: 'sdd-beto:implementer', tool_input: { command: 'git commit -m x' } }, { CLAUDE_PROJECT_DIR: dir });
+  assert.equal(JSON.parse(sub.stdout).hookSpecificOutput.permissionDecision, 'deny');
 
   // Sesión iniciada en un subdirectorio: sube a la raíz git y encuentra la config.
   const deny = run('write', { tool_input: { file_path: path.join(dir, 'api', 'service.py') } }, { CLAUDE_PROJECT_DIR: path.join(dir, 'api', 'sub') });

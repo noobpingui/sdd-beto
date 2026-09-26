@@ -99,7 +99,7 @@ Cuando el usuario responda:
   **Commits a subir:** (salida de `git log --oneline origin/<rama>..HEAD`, o `<base_branch>..HEAD` si la rama es nueva)
   ¿Apruebas el push?
   ```
-- El hook `git-guard` volverá a pedir confirmación nativa al ejecutar `git commit` o `git push`. Es una segunda barrera, no sustituye al resumen.
+- **La aprobación del usuario en el chat es la del commit o el push** (ADR-0025): el hook no vuelve a preguntar. El entorno puede pedir además su propio permiso, según el modo de permisos del usuario; eso no sustituye al resumen ni al gate.
 - Si el entorno bloquea el push (p. ej. por el modo de permisos), no lo intentes por otra vía: pide al usuario que lo ejecute él con `! git push …`.
 
 ## 5. Ciclos de corrección

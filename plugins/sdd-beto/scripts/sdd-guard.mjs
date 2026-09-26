@@ -4,8 +4,8 @@
 //   node sdd-guard.mjs write   -> Write | Edit | MultiEdit | NotebookEdit
 //   node sdd-guard.mjs shell   -> Bash | PowerShell
 //
-// Lee el JSON del hook por stdin. Para bloquear o pedir confirmación imprime
-// { hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "deny" | "ask", ... } }.
+// Lee el JSON del hook por stdin. Para bloquear imprime
+// { hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "deny", ... } }.
 // Si no imprime nada, se aplica el flujo normal de permisos.
 //
 // Sin .sdd/config.json el guard no hace nada (salvo bloquear a los agentes sdd-beto:*), para que el plugin
@@ -97,7 +97,7 @@ function allowedText(role, config) {
 
 // ---------- decisiones (funciones puras: testeables) ----------
 // ctx = { projectDir, branch, config | null, configError | null, readState(fdir) -> obj|null, bypass }
-// Devuelve null (sin decisión) o { decision: 'deny'|'ask'|null, reason?, warning? }.
+// Devuelve null (sin decisión) o { decision: 'deny' | null, reason?, warning? }.
 export function decideWrite(input, ctx) {
   const agent = input.agent_type || null;
   const role = sddRole(agent);
@@ -193,13 +193,8 @@ export function decideShell(input, ctx) {
     return null;
   }
 
-  if (subs.includes('commit') || subs.includes('push')) {
-    const what = subs.includes('push') ? 'push' : 'commit';
-    return {
-      decision: 'ask',
-      reason: `[SDD git-guard] git ${what}: confirma que ya viste y aprobaste ${what === 'push' ? 'las ramas y los commits a subir' : 'los archivos, el resumen y el mensaje del commit'}.`,
-    };
-  }
+  // Sesión principal: la aprobación de commits y pushes es el gate del chat (ADR-0025). El hook no añade
+  // un "ask": en sesiones sin interfaz equivale a denegar y en las interactivas duplica la aprobación.
   return null;
 }
 

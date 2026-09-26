@@ -15,7 +15,7 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0005](ADR-0005-tdd-estricto.md) | TDD estricto con comprobación del rojo y `tests_snapshot` |
 | [0006](ADR-0006-modelos-por-agente.md) | opus: spec, plan y review · sonnet: tasks, tests, impl y docs · haiku: verifier; sobrescribible por proyecto |
 | [0007](ADR-0007-integracion-git.md) | Rama por feature y un commit por etapa, solo desde el orquestador |
-| [0008](ADR-0008-enforcement-hooks.md) | Hooks del plugin: `role-guard` con nombres `sdd-beto:*`, `stage-guard` y `git-guard` |
+| [0008](ADR-0008-enforcement-hooks.md) | Hooks del plugin: `role-guard` con nombres `sdd-beto:*`, `stage-guard` y `git-guard` (en parte sustituida por la 0025) |
 | [0009](ADR-0009-ratchet-lint.md) | Lint con ratchet genérico: solo cuentan las violaciones nuevas, con adaptadores por formato |
 | [0010](ADR-0010-harness-propio.md) | Harness propio con ideas de Spec Kit y Kiro |
 | [0011](ADR-0011-doc-keeper.md) | Agente `doc-keeper` y etapa `docs` entre review y close |
@@ -37,3 +37,4 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0022](ADR-0022-uso-personal.md) | Uso personal: repo privado, sin licencia, instalación por HTTPS |
 | [0023](ADR-0023-archivos-del-flujo-no-son-produccion.md) | `.sdd/`, `.claude/`, `CLAUDE.md`, `AGENTS.md`, `paths.specs` y `paths.adr` nunca son producción ni test |
 | [0024](ADR-0024-implementacion-init.md) | `init`: la IA decide y `sdd-init.mjs` escribe; `CLAUDE.md` con marcas y `@AGENTS.md`; límite de profundidad sí, marketplace opcional |
+| [0025](ADR-0025-git-guard-sin-ask.md) | El `git-guard` solo restringe a los subagentes; la sesión principal aprueba commits y pushes en el gate del chat |
