@@ -4,6 +4,10 @@ Todos los cambios relevantes de `sdd-beto`. El formato sigue [Keep a Changelog](
 
 ## [Sin publicar]
 
+### Cambiado
+- **El repositorio es público y el plugin tiene licencia MIT** ([ADR-0028](docs/decisions/ADR-0028-repo-publico-mit.md), que sustituye a la ADR-0022): `LICENSE` en la raíz y en `plugins/sdd-beto/`, y `"license": "MIT"` en `plugin.json`. Instalar o actualizar ya no requiere credenciales de GitHub.
+- **README en inglés:** `README.md` pasa a estar en inglés y el español se conserva íntegro en `README.es.md`; cada uno enlaza al otro.
+
 ## [0.1.0] - 2026-09-26
 
 Primera versión. Porta a un plugin genérico un harness de Spec-Driven Development que se usaba dentro de un proyecto concreto: todo lo que dependía de ese proyecto pasa a `.sdd/config.json` y a la constitución de cada proyecto.

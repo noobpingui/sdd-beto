@@ -20,6 +20,7 @@ Cada etapa la ejecuta un subagente con permisos separados, la sesión principal 
 - **Tests de los scripts** (Node ≥ 20, sin dependencias): `node --test plugins/sdd-beto/scripts/test/`
 - **Validar el plugin y el marketplace:** `claude plugin validate ./plugins/sdd-beto` y `claude plugin validate .`
 - **Probar el plugin sin instalarlo:** `claude --plugin-dir ./plugins/sdd-beto` (o `claude -p … --plugin-dir …` en un proyecto de prueba fuera de este repo).
+- **README en dos idiomas** (ADR-0028): `README.md` (inglés) y `README.es.md` (español) tienen el mismo contenido. Todo cambio en uno se hace también en el otro, en el mismo commit.
 - **Estado de las features:** nunca se edita `state.json` a mano; se usa `node plugins/sdd-beto/scripts/sdd-state.mjs` (ADR-0021).
 
 ## Neutralidad: el plugin es genérico

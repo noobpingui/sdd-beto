@@ -31,5 +31,11 @@ Origen de cada idea: **v1** = aplazada por la [ADR-0021](decisions/ADR-0021-alca
 | **Probar el plugin en macOS y Linux** | Los scripts son Node puro, pero solo se ha probado en Windows 11 | F6 |
 | **Prueba en seco interactiva** y con una feature que toque dos ámbitos | La Fase 6 fue headless y la feature tocó un solo ámbito | F6 |
 
+## Distribución
+
+| Idea | Motivo | Origen |
+|---|---|---|
+| **Prompts y documentación en inglés** en una versión mayor | Con el repo público (ADR-0028), los prompts en español limitan quién puede adoptar o contribuir. Traducirlos toca casi todo el plugin y duplicar idiomas duplica el mantenimiento (ADR-0019) | 0.1.0 |
+
 ## Evaluado y descartado
 - **Cambiar el modelo del `verifier` a sonnet** (ADR-0006, ADR-0021): en la Fase 6, haiku respetó el formato del informe y generó las fechas con `sdd-state now` en sus tres informes (red check, verify y verify tras una corrección). Se mantiene haiku; cada proyecto puede cambiarlo con `models.verifier`.

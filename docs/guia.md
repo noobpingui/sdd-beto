@@ -1,6 +1,6 @@
 # Guía de uso de sdd-beto
 
-Esta guía explica cómo adoptar el flujo en un proyecto, cómo es una feature de principio a fin y qué hacer cuando algo no sale como esperabas. La instalación está en el [README](../README.md).
+Esta guía explica cómo adoptar el flujo en un proyecto, cómo es una feature de principio a fin y qué hacer cuando algo no sale como esperabas. La instalación está en el [README](../README.es.md).
 
 ## 1. Qué se instala y dónde
 **El plugin no se copia a tus proyectos.** Al instalarlo, Claude Code guarda `sdd-beto` (agentes, skills, hooks, scripts, plantillas y la constitución base) en su propia carpeta de plugins, en tu usuario, y lo carga en cada sesión. Para mejorar el flujo en todos tus proyectos basta con actualizar el plugin.

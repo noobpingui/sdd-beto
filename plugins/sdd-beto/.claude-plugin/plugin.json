@@ -8,5 +8,6 @@
   },
   "homepage": "https://github.com/noobpingui/sdd-beto#readme",
   "repository": "https://github.com/noobpingui/sdd-beto",
+  "license": "MIT",
   "keywords": ["sdd", "spec-driven-development", "tdd", "workflow", "subagents"]
 }

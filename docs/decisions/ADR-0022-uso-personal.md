@@ -2,6 +2,7 @@
 
 - **Estado:** Aceptada · 2026-09-25
 - **Decidido por:** usuario
+- **Sustituida por:** ADR-0028 (repositorio público con licencia MIT)
 - **Matiza:** ADR-0014 (distribución) y ADR-0019 (idioma)
 - **Documentación consultada:** `plugins/host-marketplace` → *Grant access to a private marketplace*, `discover-plugins` → *Add a private marketplace* (Claude Code v2.1.282)
 

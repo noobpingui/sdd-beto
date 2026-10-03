@@ -34,9 +34,10 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0019](ADR-0019-idioma.md) | Prompts en español; artefactos en el `language` de la config |
 | [0020](ADR-0020-plataforma.md) | Node ≥ 20 sin dependencias, hooks en forma exec, globs propios, tolerancia a CRLF |
 | [0021](ADR-0021-alcance-v1.md) | Alcance de la v1 (portado + `init` + CLI `sdd-state`) |
-| [0022](ADR-0022-uso-personal.md) | Uso personal: repo privado, sin licencia, instalación por HTTPS |
+| [0022](ADR-0022-uso-personal.md) | Uso personal: repo privado, sin licencia, instalación por HTTPS (sustituida por la 0028) |
 | [0023](ADR-0023-archivos-del-flujo-no-son-produccion.md) | `.sdd/`, `.claude/`, `CLAUDE.md`, `AGENTS.md`, `paths.specs` y `paths.adr` nunca son producción ni test |
 | [0024](ADR-0024-implementacion-init.md) | `init`: la IA decide y `sdd-init.mjs` escribe; `CLAUDE.md` con marcas y `@AGENTS.md`; límite de profundidad sí, marketplace opcional |
 | [0025](ADR-0025-git-guard-sin-ask.md) | El `git-guard` solo restringe a los subagentes; la sesión principal aprueba commits y pushes en el gate del chat |
 | [0026](ADR-0026-permisos-locales.md) | `init` propone reglas `allow` en `.claude/settings.local.json` para leer el plugin y ejecutar sus CLIs sin avisos |
 | [0027](ADR-0027-criterio-1-0.md) | 0.1.0 al cerrar la Fase 8; 1.0.0 cuando un proyecto real complete una feature con el plugin instalado |
+| [0028](ADR-0028-repo-publico-mit.md) | Repo público con licencia MIT (`LICENSE` en la raíz y en el plugin, `license` en `plugin.json`); README en inglés (`README.md`) y en español (`README.es.md`) |

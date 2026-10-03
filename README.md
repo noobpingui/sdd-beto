@@ -1,89 +1,96 @@
 # sdd-beto
 
-Plugin de Claude Code que instala en cualquier repositorio una línea de producción de **Spec-Driven Development (SDD)**:
+**English** · [Español](README.es.md)
+
+A Claude Code plugin that installs a **Spec-Driven Development (SDD)** production line in any repository:
 
 ```
-spec → plan → tasks → tests (rojo) → implement → verify → review → docs → close
+spec → plan → tasks → tests (red) → implement → verify → review → docs → close
 ```
 
-Cada etapa la hace un subagente especializado con permisos separados. La sesión principal orquesta y **tú apruebas cada etapa, cada commit y cada push**. Unos hooks impiden que un agente escriba fuera de su rol o que se toque código de producción sin una spec y un plan aprobados.
+Each stage is run by a specialized subagent with its own permissions. The main session orchestrates, and **you approve every stage, every commit and every push**. Hooks stop an agent from writing outside its role and stop production code from being touched without an approved spec and plan.
 
-## Qué obtienes
-- **Specs trazables:** historia de usuario, requisitos en formato EARS y criterios de aceptación Given/When/Then. Cada criterio acaba en un test con el marcador `SDD:`.
-- **TDD de verdad:** los tests se escriben antes que el código y un `verifier` comprueba que fallan por el motivo correcto (red check) antes de implementar.
-- **Revisión independiente:** un `reviewer` con la constitución del proyecto como checklist y un ciclo de corrección con límite de iteraciones.
-- **Documentación al día:** un `doc-keeper` actualiza la documentación afectada y la sección Proyecto de `CLAUDE.md`.
-- **Genérico:** rutas, comandos, ámbitos (monorepos incluidos) y convenciones viven en `.sdd/config.json` y en la constitución de cada proyecto, que genera `/sdd-beto:init`.
+> **Language:** the agent and skill prompts, and the documentation under `docs/`, are in Spanish. The artifacts each project generates (`spec.md`, `plan.md`, reports) and the orchestrator's messages follow the `language` set in that project's `.sdd/config.json`, so an English project gets English artifacts.
 
-## Requisitos
-- [Claude Code](https://code.claude.com/docs) reciente.
-- Node.js ≥ 20 (los scripts del plugin no tienen dependencias).
-- Un repositorio git. Los scripts son Node puro y toleran CRLF; está probado en Windows 11 y pensado también para macOS y Linux.
-- Credenciales de GitHub en el gestor de credenciales de git: el repositorio del plugin es privado.
+## What you get
+- **Traceable specs:** user story, requirements in EARS format and Given/When/Then acceptance criteria. Every criterion ends up in a test carrying the `SDD:` marker.
+- **Real TDD:** tests are written before the code, and a `verifier` checks that they fail for the right reason (red check) before implementation starts.
+- **Independent review:** a `reviewer` that uses the project's constitution as its checklist, with a fix loop capped by an iteration limit.
+- **Up-to-date documentation:** a `doc-keeper` updates the affected documentation and the Project section of `CLAUDE.md`.
+- **Generic:** paths, commands, scopes (monorepos included) and conventions live in each project's `.sdd/config.json` and constitution, which `/sdd-beto:init` generates.
 
-## Instalación
+## Requirements
+- A recent [Claude Code](https://code.claude.com/docs).
+- Node.js ≥ 20 (the plugin's scripts have no dependencies).
+- A git repository. The scripts are plain Node and tolerate CRLF; tested on Windows 11 and designed for macOS and Linux too.
+
+## Installation
 ```
 claude plugin marketplace add https://github.com/noobpingui/sdd-beto.git
 claude plugin install sdd-beto@sdd-beto
 ```
-Usa la URL HTTPS completa: el formato corto `noobpingui/sdd-beto` puede intentar SSH. El plugin queda instalado para tu usuario, pero **en un proyecto sin `.sdd/config.json` no hace nada**.
+The short form `noobpingui/sdd-beto` works too: Claude Code clones over SSH if you have a key that authenticates to GitHub, and over HTTPS otherwise. The plugin is installed for your user, but **it does nothing in a project without `.sdd/config.json`**.
 
-## Inicio rápido
-En la raíz del proyecto, dentro de Claude Code:
+## Quick start
+At the project root, inside Claude Code:
 
-1. **`/sdd-beto:init`**: analiza el repo y te propone, paso a paso y con tu aprobación, la config, la constitución del proyecto y las secciones de `CLAUDE.md`. Termina con un commit en una rama `chore/sdd-init`.
-2. **`/sdd-beto:new <slug> <idea>`**: crea la feature (número, rama y carpeta). Por ejemplo: `/sdd-beto:new export-csv Exportar el informe mensual a CSV`.
-3. **`/sdd-beto:run`**: recorre el flujo etapa a etapa. Al final de cada una verás qué se hizo, qué debes revisar y el commit propuesto; responde "aprobado" para seguir.
+1. **`/sdd-beto:init`**: analyzes the repo and proposes, step by step and with your approval, the config, the project constitution and the `CLAUDE.md` sections. It ends with a commit on a `chore/sdd-init` branch.
+2. **`/sdd-beto:new <slug> <idea>`**: creates the feature (number, branch and folder). For example: `/sdd-beto:new export-csv Export the monthly report to CSV`.
+3. **`/sdd-beto:run`**: walks through the flow stage by stage. At the end of each one you'll see what was done, what you should review and the proposed commit; answer "approved" to continue.
 
-La [guía de uso](docs/guia.md) explica cada paso con detalle.
+The [usage guide](docs/guia.md) (in Spanish) explains each step in detail.
 
-## Comandos
-| Comando | Qué hace |
+## Commands
+| Command | What it does |
 |---|---|
-| `/sdd-beto:init [notas]` | Adopta el flujo en el repo o lo actualiza (idempotente) |
-| `/sdd-beto:new <slug> <idea>` | Crea una feature: rama `feat/NNN-slug` y carpeta `<specs>/NNN-slug/` |
-| `/sdd-beto:run [NNN-slug]` | Ejecuta la siguiente etapa y encadena las demás, con un gate en cada una |
-| `/sdd-beto:status [NNN-slug]` | Estado de las features y comprobaciones de consistencia (solo lectura) |
-| `/sdd-beto:spec` · `plan` · `tasks` · `test` · `implement` · `verify` · `review` · `docs` · `close` `[NNN-slug]` | Ejecuta una sola etapa |
+| `/sdd-beto:init [notes]` | Adopts the flow in the repo or updates it (idempotent) |
+| `/sdd-beto:new <slug> <idea>` | Creates a feature: branch `feat/NNN-slug` and folder `<specs>/NNN-slug/` |
+| `/sdd-beto:run [NNN-slug]` | Runs the next stage and chains the rest, with a gate at each one |
+| `/sdd-beto:status [NNN-slug]` | Feature status and consistency checks (read-only) |
+| `/sdd-beto:spec` · `plan` · `tasks` · `test` · `implement` · `verify` · `review` · `docs` · `close` `[NNN-slug]` | Runs a single stage |
 
-Todos se invocan a mano: Claude no los lanza por su cuenta.
+All of them are invoked by hand: Claude doesn't launch them on its own.
 
-## Cómo funciona
-| Etapa | Agente | Modelo por defecto |
+## How it works
+| Stage | Agent | Default model |
 |---|---|---|
 | spec | `spec-writer` | opus |
-| plan | `planner` (y ADRs) | opus |
+| plan | `planner` (and ADRs) | opus |
 | tasks | `task-breaker` | sonnet |
-| tests | `implementer` (esqueletos) → `test-author` → `verifier` (red check) | sonnet / sonnet / haiku |
+| tests | `implementer` (stubs) → `test-author` → `verifier` (red check) | sonnet / sonnet / haiku |
 | implement | `implementer` | sonnet |
 | verify | `verifier` | haiku |
 | review | `reviewer` | opus |
 | docs | `doc-keeper` | sonnet |
-| close | la sesión principal | el de tu sesión |
+| close | the main session | your session's model |
 
-- **Artefactos:** cada feature vive en `<specs>/NNN-slug/` (`idea.md`, `spec.md`, `plan.md`, `tasks.md`, `verify-report.md`, `review.md`, `docs-report.md` y `state.json`). `state.json` es la única fuente de verdad del estado y solo lo cambia la CLI `sdd-state` del plugin.
-- **Constitución:** una parte base, igual para todos los proyectos, y una Parte II propia de cada proyecto (`.sdd/constitution.md`), que solo puede endurecer la base.
-- **Hooks:** `role-guard` (cada agente escribe solo en sus rutas y en su etapa), `stage-guard` (no se edita producción sin spec y plan aprobados) y `git-guard` (los subagentes solo usan git de lectura).
-- **Modelos:** se pueden cambiar por proyecto con `models` en `.sdd/config.json`.
+- **Artifacts:** each feature lives in `<specs>/NNN-slug/` (`idea.md`, `spec.md`, `plan.md`, `tasks.md`, `verify-report.md`, `review.md`, `docs-report.md` and `state.json`). `state.json` is the single source of truth for the state and only the plugin's `sdd-state` CLI changes it.
+- **Constitution:** a base part, the same for every project, and a Part II specific to each project (`.sdd/constitution.md`), which can only tighten the base.
+- **Hooks:** `role-guard` (each agent writes only to its own paths and in its own stage), `stage-guard` (production code isn't edited without an approved spec and plan) and `git-guard` (subagents only use read-only git).
+- **Models:** they can be changed per project with `models` in `.sdd/config.json`.
 
-## Actualizar y desinstalar
+## Updating and uninstalling
 ```
 claude plugin marketplace update sdd-beto
 claude plugin update sdd-beto@sdd-beto
 claude plugin uninstall sdd-beto@sdd-beto
 ```
-Después de actualizar, reejecuta `/sdd-beto:init` en cada proyecto: entra en modo actualización, propone solo lo que cambió y, si usas permisos locales, los apunta a la versión nueva.
+After updating, run `/sdd-beto:init` again in each project: it enters update mode, proposes only what changed and, if you use local permissions, points them at the new version.
 
-## Documentación
-- [Guía de uso](docs/guia.md): adopción, una feature de principio a fin, gates, correcciones y solución de problemas.
-- [Decisiones de diseño (ADRs)](docs/decisions/README.md).
-- [Informe de la prueba en seco](docs/06-prueba-en-seco.md): el flujo completo ejecutado con un modelo real.
-- [Ideas y mejoras pendientes](docs/ideas.md).
+## Documentation
+All in Spanish:
+- [Usage guide](docs/guia.md): adoption, one feature from start to finish, gates, fixes and troubleshooting.
+- [Design decisions (ADRs)](docs/decisions/README.md).
+- [Dry-run report](docs/06-prueba-en-seco.md): the full flow run with a real model.
+- [Ideas and pending improvements](docs/ideas.md).
 - [Changelog](CHANGELOG.md).
 
-## Desarrollo del plugin
-- Estructura: la raíz es el marketplace y el plugin vive en `plugins/sdd-beto/` (ADR-0014).
-- Tests de los scripts: `node --test plugins/sdd-beto/scripts/test/`
-- Validación: `claude plugin validate ./plugins/sdd-beto` y `claude plugin validate .`
-- Probar sin instalar: `claude --plugin-dir ./plugins/sdd-beto` en un proyecto de prueba.
-- Prueba en seco reproducible: `node tests/fixtures/dryrun/make-dryrun.mjs <destino>` (ver el informe).
+## Developing the plugin
+- Structure: the root is the marketplace and the plugin lives in `plugins/sdd-beto/` (ADR-0014).
+- Script tests: `node --test plugins/sdd-beto/scripts/test/`
+- Validation: `claude plugin validate ./plugins/sdd-beto` and `claude plugin validate .`
+- Trying it without installing: `claude --plugin-dir ./plugins/sdd-beto` in a test project.
+- Reproducible dry run: `node tests/fixtures/dryrun/make-dryrun.mjs <destination>` (see the report).
+
+## License
+[MIT](LICENSE) (ADR-0028).
