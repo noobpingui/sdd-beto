@@ -3,6 +3,7 @@
 - **Estado:** Aceptada · 2026-09-26
 - **Decidido por:** usuario (opción (a) del hallazgo O1 de la Fase 6)
 - **Amplía:** ADR-0024 (integración de `init`)
+- **Ampliada por:** ADR-0029 (`--commit-permissions`: `git add` y `git commit` sin aviso en modo `flow`)
 - **Documentación consultada:** `permissions` (*Read and Edit*, *Compound commands*) y `settings` (*Where Claude Code keeps the local file*) (Claude Code v2.1.283)
 
 ## Contexto

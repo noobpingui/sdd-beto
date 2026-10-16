@@ -46,10 +46,11 @@ No confundas las ADRs de tu proyecto con las del plugin. Las del repositorio `sd
 | 4 · Integración | Ensaya y luego aplica: carpetas de specs y ADRs, secciones de `CLAUDE.md` y settings | Tres preguntas, más abajo |
 | 5 · Commit | Rama `chore/sdd-init` y commit de los archivos de init | El commit (y el push, aparte) |
 
-**Las tres preguntas del paso 4:**
+**Las preguntas del paso 4** (la cuarta, solo con `gate_mode: "flow"`):
 - **Límite de profundidad de subagentes** (`.claude/settings.json`): impide que un subagente lance a otros y se salte la separación de roles. Afecta a todas las sesiones del proyecto. Recomendado: sí.
 - **Marketplace del plugin** (`.claude/settings.json`): deja escrito en el repo de dónde se instala `sdd-beto`. Solo sirve a quien abra el repo sin el plugin instalado. Recomendado: no.
 - **Permisos locales** (`.claude/settings.local.json`, que no se versiona): permite leer los archivos del plugin y ejecutar sus CLIs sin un aviso de permiso cada vez. Recomendado: sí si trabajas de forma interactiva.
+- **Commits sin aviso** (también en `.claude/settings.local.json`): `git add` y `git commit`, nunca `push`, para que los commits automáticos de cada etapa no se detengan a pedir permiso. Valen para cualquier commit del proyecto. Recomendado: sí con `flow`.
 
 **Lo que queda en el proyecto:**
 - `.sdd/config.json` y `.sdd/constitution.md`;

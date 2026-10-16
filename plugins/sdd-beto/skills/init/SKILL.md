@@ -88,17 +88,18 @@ Gate 3: muestra el texto completo (o el diff) y pregunta **"¿Apruebas la consti
 
 ## Paso 4 · Integración
 1. **Sección Proyecto de `CLAUDE.md`** (ADR-0013). Si `scan` la marcó como `ok`, **se conserva**: la mantiene el `doc-keeper` y no se propone de nuevo, salvo que el usuario pida rehacerla (`--replace-project-section`). Si no existe, redacta un borrador en el `language` de la config, de 10 a 25 líneas, empezando por `## Proyecto`: qué es, áreas, arquitectura, despliegue y puntos delicados. Para los comandos, remite a la tabla de ámbitos de la sección Convenciones; no la repitas.
-2. **Tres decisiones para el usuario:**
+2. **Decisiones para el usuario** (tres, o cuatro con `gate_mode: "flow"`):
    - **Límite de profundidad de subagentes** (ADR-0001), en `.claude/settings.json`: `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` impide que un subagente lance otros y se salte la separación de roles. Afecta a **toda** sesión en este proyecto, también fuera del flujo SDD. **Recomendado: sí.** Si lo rechaza, usa `--no-depth-limit`.
    - **Marketplace del plugin**, en `.claude/settings.json`: `extraKnownMarketplaces` y `enabledPlugins` dejan escrito en el repo de dónde se obtiene `sdd-beto`. Solo sirve a quien abra el repo en otra máquina sin el plugin instalado: no instala nada solo y exige confiar en la carpeta. **Recomendado: no**, salvo que el usuario lo pida. Si lo acepta, usa `--marketplace`.
    - **Permisos locales del plugin** (ADR-0026), en `.claude/settings.local.json`, que es personal y no se versiona: reglas `allow` para leer los archivos del plugin y ejecutar `sdd-state` y `lint-ratchet` sin un aviso de permiso cada vez. Llevan la ruta del plugin en esta máquina, así que al actualizar el plugin hay que reejecutar init (`scan` lo detecta: `sdd.local_permissions.up_to_date`). Si `.gitignore` no ignora ese archivo, el script lo añade. **Recomendado: sí** si se va a usar el flujo en una sesión interactiva. Si lo acepta, usa `--local-permissions`.
+   - **Solo con `gate_mode: "flow"` · Commits sin aviso** (ADR-0029), también en `.claude/settings.local.json`: `Bash(git add *)` y `Bash(git commit *)`, más sus equivalentes `PowerShell(…)`. En `flow` los commits de cada etapa son automáticos; sin estas reglas, Claude Code puede pedir permiso en cada uno (según el modo de permisos) y el flujo se detiene igualmente. Los commits son locales: **nunca** se añade `git push`, que solo sale en el gate de `close`. Ojo: las reglas valen para cualquier `git add` y `git commit` en este proyecto, no solo los del flujo. **Recomendado: sí** con `flow`. Si lo acepta, usa `--commit-permissions`. Si `scan` ya marca `sdd.local_permissions.commit_rules: true`, no lo preguntes.
 3. Ejecuta `sdd-init integrate --dry-run` con las opciones que correspondan (y `--project-section -` con el borrador por stdin). Presenta:
    - las carpetas que se crean (`paths.specs`, `paths.adr`);
    - `CLAUDE.md`: qué pasa con cada sección (`create`, `update`, `unchanged`, `kept`), el borrador de Proyecto y, si el archivo es nuevo y existe `AGENTS.md`, que se importa con `@AGENTS.md`;
    - `.claude/settings.json`, `.claude/settings.local.json` y `.gitignore`: las `notes` del script, que listan cada cambio;
-   - las tres preguntas del punto 2, con su recomendación.
+   - las preguntas del punto 2, con su recomendación.
 
-Gate 4: **"¿Apruebas la integración, con estas respuestas a las tres preguntas?"** Con la aprobación, ejecuta el mismo `integrate` sin `--dry-run` y comprueba que las acciones coinciden con las del ensayo.
+Gate 4: **"¿Apruebas la integración, con estas respuestas a las preguntas?"** Con la aprobación, ejecuta el mismo `integrate` sin `--dry-run` y comprueba que las acciones coinciden con las del ensayo.
 
 ## Paso 5 · Commit
 1. **Rama:** `chore/sdd-init`, u otra si el usuario la prefiere. Si ya estás en una rama que no es la base, pregunta si se commitea ahí.

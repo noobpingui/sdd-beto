@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  findSection, isPluginRule, jsonDiff, localPermissionRules, mergeClaudeMd, mergeLocalPermissions, pluginInfo, posixPath, renderTemplate, SECTIONS,
+  COMMIT_PERMISSION_RULES, findSection, isPluginRule, jsonDiff, localPermissionRules, mergeClaudeMd, mergeLocalPermissions, pluginInfo, posixPath, renderTemplate, SECTIONS,
 } from '../sdd-init.mjs';
 import { applyDefaults } from '../lib/config.mjs';
 
@@ -428,7 +428,7 @@ test('integrate --local-permissions: escribe settings.local.json y lo añade a .
   assert.ok(!again.data.files.some((f) => f.path === '.gitignore'), 'ya lo ignora: no toca .gitignore');
 
   const scan = r.cli(['scan']).data.sdd.local_permissions;
-  assert.deepEqual(scan, { exists: true, valid: true, up_to_date: true, stale: 0 });
+  assert.deepEqual(scan, { exists: true, valid: true, up_to_date: true, stale: 0, commit_rules: false });
 });
 
 test('integrate --local-permissions: avisa si settings.local.json está versionado y no toca .gitignore', (t) => {
@@ -453,4 +453,21 @@ test('renderTemplate: la sección de aprobación depende de gate_mode (ADR-0029)
   assert.match(strict, /Modo de gates: `strict`/);
   assert.match(strict, /Antes de cada `git push`/);
   assert.doesNotMatch(strict, /\{\{/);
+});
+
+test('integrate --commit-permissions: añade git add/commit (nunca push) sin quitar las reglas del plugin (ADR-0029)', (t) => {
+  const r = makeRepo(t);
+  withConfig(r);
+  assert.ok(!COMMIT_PERMISSION_RULES.some((x) => x.includes('push')));
+  assert.ok(!COMMIT_PERMISSION_RULES.some(isPluginRule), 'no son reglas del plugin: una actualización no las sustituye');
+
+  const first = r.cli(['integrate', '--no-depth-limit', '--local-permissions']);
+  assert.equal(first.code, 0, first.stderr);
+  const res = r.cli(['integrate', '--no-depth-limit', '--commit-permissions']);
+  assert.equal(res.code, 0, res.stderr);
+  assert.deepEqual(JSON.parse(r.read('.claude/settings.local.json')).permissions.allow, [...localPermissionRules(), ...COMMIT_PERMISSION_RULES]);
+  assert.equal(r.cli(['scan']).data.sdd.local_permissions.commit_rules, true);
+
+  const again = r.cli(['integrate', '--no-depth-limit', '--local-permissions', '--commit-permissions']);
+  assert.ok(again.data.files.every((f) => f.action === 'unchanged'), JSON.stringify(again.data.files));
 });

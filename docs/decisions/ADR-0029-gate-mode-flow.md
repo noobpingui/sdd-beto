@@ -70,3 +70,12 @@ El gate muestra antes todo lo que va a pasar: ramas, commits que se suben, títu
 - (−) El usuario ve el plan y las tareas por primera vez en el gate de review, cuando ya hay código. Lo mitigan el criterio de decisión mayor (§4) y el `rework` desde review. Quien prefiera revisarlos antes puede usar `"strict"`.
 - (−) Una sola aprobación al cierre llega hasta el merge en la rama base. El gate tiene que mostrar con detalle todo lo que va a hacer.
 - La CLI `sdd-state` no cambia: las aprobaciones automáticas usan el mismo `approve` con una nota distinta.
+
+## Añadido tras la aceptación: permisos de commit
+Los commits automáticos no evitan el aviso de permiso propio de Claude Code. En el modo por defecto, cada `git commit` puede pedir confirmación, y el flujo se detendría igualmente en cada etapa.
+
+- **Documentación consultada:** `permissions` (*Wildcard patterns*, *Compound commands*, *PowerShell*).
+- `sdd-init integrate --commit-permissions` añade a `permissions.allow` de `.claude/settings.local.json`: `Bash(git add *)`, `Bash(git commit *)`, `PowerShell(git add *)` y `PowerShell(git commit *)`. Hacen falta las dos, la de `add` y la de `commit`, porque en un comando compuesto cada parte debe coincidir con una regla. Las reglas de PowerShell son independientes de las de Bash.
+- **Nunca `git push`**, ni `gh`: lo que sale de la máquina pasa por Claude Code según el modo de permisos del usuario, además de por el gate de `close`.
+- `/sdd-beto:init` lo propone en el gate 4 solo con `gate_mode: "flow"`, con recomendación "sí". Es independiente de `--local-permissions` (ADR-0026). No son reglas "del plugin": una actualización no las sustituye y `init` nunca las quita. `scan` informa de si están (`sdd.local_permissions.commit_rules`).
+- (−) Las reglas autorizan cualquier `git add` y `git commit` en ese proyecto, no solo los del flujo. Por eso son opcionales y se preguntan.

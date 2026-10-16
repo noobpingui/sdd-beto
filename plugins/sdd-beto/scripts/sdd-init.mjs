@@ -20,9 +20,9 @@ const USAGE = `Uso: node sdd-init.mjs <comando> [opciones]
   preview                       valida una config borrador (stdin) y muestra cómo clasifica el repo (solo lectura)
   write-config [--dry-run]      valida la config de stdin y la escribe en ${CONFIG_REL}
   integrate [--dry-run] [--project-section -] [--replace-project-section]
-            [--no-depth-limit] [--marketplace] [--local-permissions]
+            [--no-depth-limit] [--marketplace] [--local-permissions] [--commit-permissions]
                                 carpetas de specs y ADRs, secciones de CLAUDE.md, .claude/settings.json
-                                y, con --local-permissions, .claude/settings.local.json
+                                y, con --local-permissions o --commit-permissions, .claude/settings.local.json
 
 Opciones comunes:
   --project <dir>               por defecto, la raíz git del directorio actual
@@ -34,6 +34,8 @@ export const SETTINGS_REL = '.claude/settings.json';
 export const DEPTH_VAR = 'CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH';
 export const LOCAL_SETTINGS_REL = '.claude/settings.local.json';
 const ALLOWED_SCRIPTS = ['sdd-state.mjs', 'lint-ratchet.mjs'];
+// Commits locales sin aviso para gate_mode "flow" (ADR-0029). Nunca push: ese sale solo en el gate de close.
+export const COMMIT_PERMISSION_RULES = ['Bash(git add *)', 'Bash(git commit *)', 'PowerShell(git add *)', 'PowerShell(git commit *)'];
 const SETTINGS_SCHEMA = 'https://json.schemastore.org/claude-code-settings.json';
 
 class InitError extends Error { constructor(m, code = 2) { super(m); this.code = code; } }
@@ -451,7 +453,8 @@ export function isPluginRule(rule) {
   return /^Read\(\/\/.+\/\*\*\)$/.test(rule) && rule.split('/').includes('sdd-beto');
 }
 
-export function mergeLocalPermissions(previousText, rules = localPermissionRules()) {
+// replaceStale: quita las reglas del plugin de otras versiones (solo cuando `rules` incluye las de esta).
+export function mergeLocalPermissions(previousText, rules = localPermissionRules(), { replaceStale = true } = {}) {
   let s = {};
   if (previousText !== null) {
     try { s = JSON.parse(toLf(previousText)); } catch (e) {
@@ -460,7 +463,7 @@ export function mergeLocalPermissions(previousText, rules = localPermissionRules
     if (s === null || typeof s !== 'object' || Array.isArray(s)) throw new InitError(`${LOCAL_SETTINGS_REL} debe ser un objeto JSON`);
   }
   const allow = Array.isArray(s.permissions?.allow) ? s.permissions.allow : [];
-  const stale = allow.filter((r) => isPluginRule(r) && !rules.includes(r));
+  const stale = replaceStale ? allow.filter((r) => isPluginRule(r) && !rules.includes(r)) : [];
   const missing = rules.filter((r) => !allow.includes(r));
   const notes = [
     ...stale.map((r) => `se quita (otra versión del plugin): ${r}`),
@@ -480,6 +483,7 @@ function localPermissionFacts(dir) {
     exists: true, valid: true,
     up_to_date: current.every((r) => allow.includes(r)),
     stale: allow.filter((r) => isPluginRule(r) && !current.includes(r)).length,
+    commit_rules: COMMIT_PERMISSION_RULES.every((r) => allow.includes(r)),
   };
 }
 
@@ -518,9 +522,10 @@ export function integrate(dir, opts = {}) {
   }
 
   // 4. .claude/settings.local.json (opcional), que git debe ignorar: lleva rutas de esta máquina.
-  if (opts.localPermissions) {
+  if (opts.localPermissions || opts.commitPermissions) {
     const previousLocal = readText(path.join(dir, LOCAL_SETTINGS_REL));
-    const local = mergeLocalPermissions(previousLocal);
+    const rules = [...(opts.localPermissions ? localPermissionRules() : []), ...(opts.commitPermissions ? COMMIT_PERMISSION_RULES : [])];
+    const local = mergeLocalPermissions(previousLocal, rules, { replaceStale: Boolean(opts.localPermissions) });
     const plan = local.notes.length === 0 && previousLocal !== null
       ? { path: LOCAL_SETTINGS_REL, action: 'unchanged' }
       : planFile(dir, LOCAL_SETTINGS_REL, local.text, previousLocal);
@@ -579,6 +584,7 @@ export function run(argv, { stdin = readStdin } = {}) {
           depthLimit: !opt['no-depth-limit'],
           marketplace: Boolean(opt.marketplace),
           localPermissions: Boolean(opt['local-permissions']),
+          commitPermissions: Boolean(opt['commit-permissions']),
         }),
       };
     }

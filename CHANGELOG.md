@@ -10,6 +10,7 @@ Todos los cambios relevantes de `sdd-beto`. El formato sigue [Keep a Changelog](
   - `strict`: el comportamiento anterior, con un gate por etapa y cada commit y push aprobados aparte.
 - **Backlog en dos niveles:** los agentes informan de lo que dejan pendiente en un campo `BACKLOG:`; el orquestador lo copia en `<specs>/NNN-slug/backlog.md` y, al cerrar, pasa lo abierto a `paths.backlog` (por defecto `docs/backlog.md`).
 - `sdd-state show` incluye el `gate_mode`, y `/sdd-beto:init` lo propone y lo pregunta.
+- **`sdd-init integrate --commit-permissions`:** reglas `allow` para `git add` y `git commit` (Bash y PowerShell, nunca `push`) en `.claude/settings.local.json`, para que los commits automáticos de `flow` no pidan permiso. `/sdd-beto:init` lo ofrece con `flow`.
 
 ### Cambiado
 - **Incompatible:** el comportamiento por defecto pasa de un gate por etapa a `flow`. Para conservar el anterior, añade `"gate_mode": "strict"` a `.sdd/config.json`. Las versiones anteriores rechazan una config con `gate_mode` o `paths.backlog` por "campo desconocido".
