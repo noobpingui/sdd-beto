@@ -1,7 +1,7 @@
 {
   "name": "sdd-beto",
   "displayName": "SDD Beto",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Spec-Driven Development pipeline: one subagent per role, hook-enforced boundaries and a human approval gate at every stage",
   "author": {
     "name": "Noobpingui"

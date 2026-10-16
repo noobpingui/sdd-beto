@@ -4,6 +4,8 @@ Todos los cambios relevantes de `sdd-beto`. El formato sigue [Keep a Changelog](
 
 ## [Sin publicar]
 
+## [0.2.0] - 2026-10-15
+
 ### Añadido
 - **Modo de gates configurable** ([ADR-0029](docs/decisions/ADR-0029-gate-mode-flow.md)), con `gate_mode` en `.sdd/config.json`:
   - `flow` (nuevo, **por defecto**): el flujo se detiene solo en tres gates (spec, review y close) y ante decisiones mayores. Los commits por etapa son automáticos y locales, el gate de review resume todas las etapas y el de close aprueba de una vez el commit final, el push, el PR y su merge (merge commit, con borrado de la rama).
@@ -43,5 +45,6 @@ Primera versión. Porta a un plugin genérico un harness de Spec-Driven Developm
 - Solo se ha probado en Windows 11.
 - El resto de mejoras previstas está en [docs/ideas.md](docs/ideas.md).
 
-[Sin publicar]: https://github.com/noobpingui/sdd-beto/compare/sdd-beto--v0.1.0...HEAD
+[Sin publicar]: https://github.com/noobpingui/sdd-beto/compare/sdd-beto--v0.2.0...HEAD
+[0.2.0]: https://github.com/noobpingui/sdd-beto/compare/sdd-beto--v0.1.0...sdd-beto--v0.2.0
 [0.1.0]: https://github.com/noobpingui/sdd-beto/releases/tag/sdd-beto--v0.1.0

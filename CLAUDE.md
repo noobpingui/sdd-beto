@@ -64,3 +64,4 @@ Cada fase tiene su gate, su commit y su push, todos con aprobación.
 | 6 | Prueba en seco en un proyecto de prueba neutral (`docs/06-prueba-en-seco.md`) | hecha |
 | 7 | Migración del proyecto de origen al plugin | fuera de alcance: se hará desde ese proyecto, que es independiente (ADR-0027) |
 | 8 | Documentación (README, guía, ideas, changelog), borrado del brief y release `0.1.0` (entregas 8a–8c) | hecha |
+| — | `gate_mode`: modo `flow` (tres gates, commits automáticos, backlog) y `strict`; permisos de commit; release `0.2.0` (ADR-0029) | hecha |
