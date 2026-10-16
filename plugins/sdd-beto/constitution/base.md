@@ -37,13 +37,21 @@
 
 ## Art. B3 — Aprobación humana
 
-1. El orquestador **DEBE** detenerse al cerrar cada etapa y esperar la aprobación explícita del usuario
-   ("aprobado", "sí" o equivalente claro).
-2. Antes de **cualquier** `git commit` **DEBE** mostrar los archivos incluidos (`git status` y `git diff --stat`),
-   un resumen claro de los cambios y el mensaje propuesto.
-3. Antes de **cualquier** `git push` **DEBE** mostrar la rama de origen y de destino y la lista de commits.
+1. El orquestador **DEBE** detenerse en los gates que exige `gate_mode` de la config y esperar la aprobación
+   explícita del usuario ("aprobado", "sí" o equivalente claro):
+   - `flow`: al cerrar `spec`, `review` y `close`, y ante cualquier decisión mayor (cambiar el alcance de la spec,
+     incumplir esta constitución, una dependencia nueva, una migración destructiva o romper una API, algo que afecte a
+     la seguridad o a los datos, una ambigüedad con resultados distintos, o el límite de iteraciones);
+   - `strict`: al cerrar cada etapa.
+2. En `strict`, antes de **cualquier** `git commit` **DEBE** mostrar los archivos incluidos (`git status` y
+   `git diff --stat`), un resumen claro de los cambios y el mensaje propuesto, y esperar la aprobación. En `flow`, los
+   commits de cada etapa son automáticos y locales, en la rama de la feature, con las mismas comprobaciones (Art. B6).
+3. Antes de **cualquier** `git push` **DEBE** mostrar la rama de origen y de destino y la lista de commits, y esperar la
+   aprobación. En `flow`, eso ocurre una sola vez, en el gate de `close`, junto con el PR y el merge.
 4. El silencio o una respuesta ambigua **no** son aprobación.
-5. Varias etapas nunca se agrupan en una sola aprobación.
+5. Nunca se agrupan en una sola aprobación etapas que el modo no agrupa.
+6. Lo que se decide sin consultar al usuario y queda pendiente se anota en el backlog de la feature, que se le
+   presenta en el gate de `review`.
 
 ## Art. B4 — Trazabilidad
 
@@ -98,7 +106,7 @@
 
 Una feature está **hecha** solo cuando se cumple todo esto:
 
-- [ ] `spec.md`, `plan.md` y `tasks.md` aprobados por el usuario.
+- [ ] `spec.md` aprobado por el usuario; `plan.md` y `tasks.md` aprobados por el usuario (`strict`) o revisados en el gate de `review` (`flow`).
 - [ ] Todas las tareas de `tasks.md` están marcadas `[x]`.
 - [ ] Cada AC tiene al menos un test con el marcador `SDD:` y todos pasan.
 - [ ] En cada ámbito tocado pasan todos los comandos declarados en la config: `test`, `lint` (sin errores) o
@@ -107,4 +115,5 @@ Una feature está **hecha** solo cuando se cumple todo esto:
 - [ ] `review.md` tiene veredicto **APPROVED**, sin hallazgos BLOQUEANTES ni MAYORES abiertos.
 - [ ] El `doc-keeper` actualizó la documentación afectada o dejó constancia de que no hacía falta.
 - [ ] Se cumplen los puntos adicionales de la Parte II (P4), si los hay.
-- [ ] El usuario aprobó el cierre y cada commit y push.
+- [ ] El usuario aprobó el cierre (en `strict`, también cada commit y push).
+- [ ] Los puntos abiertos del backlog de la feature pasaron al backlog del proyecto (`paths.backlog`).

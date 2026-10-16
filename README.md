@@ -8,7 +8,7 @@ A Claude Code plugin that installs a **Spec-Driven Development (SDD)** productio
 spec → plan → tasks → tests (red) → implement → verify → review → docs → close
 ```
 
-Each stage is run by a specialized subagent with its own permissions. The main session orchestrates, and **you approve every stage, every commit and every push**. Hooks stop an agent from writing outside its role and stop production code from being touched without an approved spec and plan.
+Each stage is run by a specialized subagent with its own permissions. The main session orchestrates, and **you approve at three gates: the spec, the review and the close** (which covers push, PR and merge in one go). In between, the flow only stops for major decisions; minor ones are logged in a backlog. A `strict` mode keeps a gate at every stage, commit and push. Hooks stop an agent from writing outside its role and stop production code from being touched without an approved spec and plan.
 
 > **Language:** the agent and skill prompts, and the documentation under `docs/`, are in Spanish. The artifacts each project generates (`spec.md`, `plan.md`, reports) and the orchestrator's messages follow the `language` set in that project's `.sdd/config.json`, so an English project gets English artifacts.
 
@@ -36,7 +36,7 @@ At the project root, inside Claude Code:
 
 1. **`/sdd-beto:init`**: analyzes the repo and proposes, step by step and with your approval, the config, the project constitution and the `CLAUDE.md` sections. It ends with a commit on a `chore/sdd-init` branch.
 2. **`/sdd-beto:new <slug> <idea>`**: creates the feature (number, branch and folder). For example: `/sdd-beto:new export-csv Export the monthly report to CSV`.
-3. **`/sdd-beto:run`**: walks through the flow stage by stage. At the end of each one you'll see what was done, what you should review and the proposed commit; answer "approved" to continue.
+3. **`/sdd-beto:run`**: walks through the flow. It stops for you to approve the spec, then runs on its own (with a local commit per stage) up to the review, where you get a summary of every stage and the backlog. The close gate pushes, opens the PR and merges it; answer "approved" at each gate.
 
 The [usage guide](docs/guia.md) (in Spanish) explains each step in detail.
 
@@ -45,7 +45,7 @@ The [usage guide](docs/guia.md) (in Spanish) explains each step in detail.
 |---|---|
 | `/sdd-beto:init [notes]` | Adopts the flow in the repo or updates it (idempotent) |
 | `/sdd-beto:new <slug> <idea>` | Creates a feature: branch `feat/NNN-slug` and folder `<specs>/NNN-slug/` |
-| `/sdd-beto:run [NNN-slug]` | Runs the next stage and chains the rest, with a gate at each one |
+| `/sdd-beto:run [NNN-slug]` | Runs the next stage and chains the rest, stopping at the gates of the `gate_mode` |
 | `/sdd-beto:status [NNN-slug]` | Feature status and consistency checks (read-only) |
 | `/sdd-beto:spec` · `plan` · `tasks` · `test` · `implement` · `verify` · `review` · `docs` · `close` `[NNN-slug]` | Runs a single stage |
 
@@ -64,9 +64,10 @@ All of them are invoked by hand: Claude doesn't launch them on its own.
 | docs | `doc-keeper` | sonnet |
 | close | the main session | your session's model |
 
-- **Artifacts:** each feature lives in `<specs>/NNN-slug/` (`idea.md`, `spec.md`, `plan.md`, `tasks.md`, `verify-report.md`, `review.md`, `docs-report.md` and `state.json`). `state.json` is the single source of truth for the state and only the plugin's `sdd-state` CLI changes it.
+- **Artifacts:** each feature lives in `<specs>/NNN-slug/` (`idea.md`, `spec.md`, `plan.md`, `tasks.md`, `verify-report.md`, `review.md`, `docs-report.md`, `backlog.md` and `state.json`). `state.json` is the single source of truth for the state and only the plugin's `sdd-state` CLI changes it.
 - **Constitution:** a base part, the same for every project, and a Part II specific to each project (`.sdd/constitution.md`), which can only tighten the base.
 - **Hooks:** `role-guard` (each agent writes only to its own paths and in its own stage), `stage-guard` (production code isn't edited without an approved spec and plan) and `git-guard` (subagents only use read-only git).
+- **Gate modes** (`gate_mode` in `.sdd/config.json`): `flow` (default) stops at spec, review and close, plus major decisions (scope changes, constitution breaches, new dependencies, destructive migrations, broken APIs, security or data, real ambiguities, iteration limit); stage commits are automatic and local. `strict` stops after every stage and asks before every commit and push.
 - **Models:** they can be changed per project with `models` in `.sdd/config.json`.
 
 ## Updating and uninstalling

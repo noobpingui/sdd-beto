@@ -70,6 +70,19 @@ test('config: una config mínima es válida y recibe los valores por defecto', (
   assert.equal(c.scopes.api.commands.build, null);
 });
 
+test('config: gate_mode y paths.backlog tienen valor por defecto y se validan (ADR-0029)', () => {
+  const d = applyDefaults(baseConfig());
+  assert.equal(d.gate_mode, 'flow');
+  assert.equal(d.paths.backlog, 'docs/backlog.md');
+  const strict = applyDefaults({ ...baseConfig(), gate_mode: 'strict', paths: { backlog: 'BACKLOG.md' } });
+  assert.equal(strict.gate_mode, 'strict');
+  assert.equal(strict.paths.backlog, 'BACKLOG.md');
+  assert.equal(strict.paths.specs, 'specs');
+  const issues = validateConfig({ ...baseConfig(), gate_mode: 'yolo', paths: { backlog: '../b.md' } }).join('\n');
+  assert.match(issues, /gate_mode: debe ser uno de flow, strict/);
+  assert.match(issues, /paths\.backlog: ruta relativa no válida/);
+});
+
 test('config: la plantilla del plugin es válida', () => {
   assert.deepEqual(validateConfig(readJson('templates/config.json')), []);
 });
@@ -139,6 +152,7 @@ test('paths: los archivos del flujo SDD nunca son producción ni test, aunque "*
   assert.equal(classify('lib/a.js', wide).kind, 'prod');
   assert.equal(classify('lib/a.test.js', wide).kind, 'test');
   assert.equal(classify('docs/guide.md', wide).kind, 'prod'); // solo paths.adr se excluye, no todo docs/
+  assert.equal(classify('docs/backlog.md', wide).kind, 'other'); // paths.backlog (ADR-0029)
   assert.equal(classify('specsheet/a.js', wide).kind, 'prod'); // prefijo de carpeta, no de texto
   assert.equal(classify('.sddrc', wide).kind, 'prod');
 });

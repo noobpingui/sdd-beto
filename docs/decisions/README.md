@@ -11,10 +11,10 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0001](ADR-0001-orquestacion.md) | Orquestador en la sesión principal, sin anidamiento de subagentes; `init` propone limitar la profundidad |
 | [0002](ADR-0002-formato-requisitos.md) | Requisitos híbridos: historia de usuario, REQ en EARS y AC en Given/When/Then |
 | [0003](ADR-0003-estructura-artefactos.md) | `<specs>/NNN-slug/` con sus artefactos y `state.json` como única fuente de verdad |
-| [0004](ADR-0004-gates-humanos.md) | Gate humano en cada etapa; `max_iterations` (3) antes de escalar |
+| [0004](ADR-0004-gates-humanos.md) | Gate humano en cada etapa; `max_iterations` (3) antes de escalar (sustituida en parte por la 0029: es el modo `strict`) |
 | [0005](ADR-0005-tdd-estricto.md) | TDD estricto con comprobación del rojo y `tests_snapshot` |
 | [0006](ADR-0006-modelos-por-agente.md) | opus: spec, plan y review · sonnet: tasks, tests, impl y docs · haiku: verifier; sobrescribible por proyecto |
-| [0007](ADR-0007-integracion-git.md) | Rama por feature y un commit por etapa, solo desde el orquestador |
+| [0007](ADR-0007-integracion-git.md) | Rama por feature y un commit por etapa, solo desde el orquestador (en `flow`, commits automáticos y cierre con una sola aprobación: 0029) |
 | [0008](ADR-0008-enforcement-hooks.md) | Hooks del plugin: `role-guard` con nombres `sdd-beto:*`, `stage-guard` y `git-guard` (en parte sustituida por la 0025) |
 | [0009](ADR-0009-ratchet-lint.md) | Lint con ratchet genérico: solo cuentan las violaciones nuevas, con adaptadores por formato |
 | [0010](ADR-0010-harness-propio.md) | Harness propio con ideas de Spec Kit y Kiro |
@@ -41,3 +41,4 @@ Estas ADRs son del **plugin**. Las decisiones de cada proyecto consumidor van en
 | [0026](ADR-0026-permisos-locales.md) | `init` propone reglas `allow` en `.claude/settings.local.json` para leer el plugin y ejecutar sus CLIs sin avisos |
 | [0027](ADR-0027-criterio-1-0.md) | 0.1.0 al cerrar la Fase 8; 1.0.0 cuando un proyecto real complete una feature con el plugin instalado |
 | [0028](ADR-0028-repo-publico-mit.md) | Repo público con licencia MIT (`LICENSE` en la raíz y en el plugin, `license` en `plugin.json`); README en inglés (`README.md`) y en español (`README.es.md`) |
+| [0029](ADR-0029-gate-mode-flow.md) | `gate_mode`: `flow` (por defecto; gates en spec, review y close, más decisiones mayores; commits automáticos; backlog por feature y global) o `strict` (ADR-0004) |

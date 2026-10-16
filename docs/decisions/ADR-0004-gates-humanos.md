@@ -1,6 +1,7 @@
 # ADR-0004 — Gate humano al cerrar cada etapa y ciclos de corrección acotados
 
 - **Estado:** Aceptada · 2026-09-25
+- **Sustituida en parte por:** ADR-0029 (con `gate_mode: "flow"`, por defecto, solo hay gates en spec, review y close; esta ADR sigue vigente como modo `strict`)
 - **Decidido por:** usuario (gate en cada etapa) y Claude (formato)
 
 ## Contexto

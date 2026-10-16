@@ -22,7 +22,8 @@ Feature: `$ARGUMENTS` (si está vacío, se muestran todas).
 3. Muestra una tabla con una fila por feature (datos de `sdd-state show --feature <NNN> --json`):
    `Feature | Tipo | Rama | Etapa | Estado | Aprobadas (n/9) | Iteraciones (tests/impl/review) | Último evento`
 4. Para la feature indicada, o la de la rama actual, añade el detalle:
-   - las aprobaciones con fecha y los commits por etapa;
+   - las aprobaciones con fecha y los commits por etapa (distingue las del usuario de las automáticas de `gate_mode: flow`, cuya nota empieza por `auto`; están en `approvals.<etapa>.note` de `state.json`);
+   - el modo de gates (`gate_mode`) y los puntos abiertos de `<specs>/NNN-slug/backlog.md`, si existe;
    - el resultado del red check, de verify y de review;
    - los últimos 5 eventos del historial;
    - si hay `tests_snapshot` y la etapa es posterior a `tests`, el resultado de `sdd-state snapshot --check`.

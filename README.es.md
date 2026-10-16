@@ -8,7 +8,7 @@ Plugin de Claude Code que instala en cualquier repositorio una línea de producc
 spec → plan → tasks → tests (rojo) → implement → verify → review → docs → close
 ```
 
-Cada etapa la hace un subagente especializado con permisos separados. La sesión principal orquesta y **tú apruebas cada etapa, cada commit y cada push**. Unos hooks impiden que un agente escriba fuera de su rol o que se toque código de producción sin una spec y un plan aprobados.
+Cada etapa la hace un subagente especializado con permisos separados. La sesión principal orquesta y **tú apruebas en tres gates: la spec, la review y el cierre** (que cubre de una vez el push, el PR y el merge). Entre medias, el flujo solo se detiene por decisiones mayores; las menores quedan en un backlog. El modo `strict` mantiene un gate en cada etapa, commit y push. Unos hooks impiden que un agente escriba fuera de su rol o que se toque código de producción sin una spec y un plan aprobados.
 
 ## Qué obtienes
 - **Specs trazables:** historia de usuario, requisitos en formato EARS y criterios de aceptación Given/When/Then. Cada criterio acaba en un test con el marcador `SDD:`.
@@ -34,7 +34,7 @@ En la raíz del proyecto, dentro de Claude Code:
 
 1. **`/sdd-beto:init`**: analiza el repo y te propone, paso a paso y con tu aprobación, la config, la constitución del proyecto y las secciones de `CLAUDE.md`. Termina con un commit en una rama `chore/sdd-init`.
 2. **`/sdd-beto:new <slug> <idea>`**: crea la feature (número, rama y carpeta). Por ejemplo: `/sdd-beto:new export-csv Exportar el informe mensual a CSV`.
-3. **`/sdd-beto:run`**: recorre el flujo etapa a etapa. Al final de cada una verás qué se hizo, qué debes revisar y el commit propuesto; responde "aprobado" para seguir.
+3. **`/sdd-beto:run`**: recorre el flujo. Se detiene para que apruebes la spec y después avanza solo (con un commit local por etapa) hasta la review, donde ves un resumen de todas las etapas y el backlog. El gate de cierre hace el push, abre el PR y lo integra; responde "aprobado" en cada gate.
 
 La [guía de uso](docs/guia.md) explica cada paso con detalle.
 
@@ -43,7 +43,7 @@ La [guía de uso](docs/guia.md) explica cada paso con detalle.
 |---|---|
 | `/sdd-beto:init [notas]` | Adopta el flujo en el repo o lo actualiza (idempotente) |
 | `/sdd-beto:new <slug> <idea>` | Crea una feature: rama `feat/NNN-slug` y carpeta `<specs>/NNN-slug/` |
-| `/sdd-beto:run [NNN-slug]` | Ejecuta la siguiente etapa y encadena las demás, con un gate en cada una |
+| `/sdd-beto:run [NNN-slug]` | Ejecuta la siguiente etapa y encadena las demás, deteniéndose en los gates del `gate_mode` |
 | `/sdd-beto:status [NNN-slug]` | Estado de las features y comprobaciones de consistencia (solo lectura) |
 | `/sdd-beto:spec` · `plan` · `tasks` · `test` · `implement` · `verify` · `review` · `docs` · `close` `[NNN-slug]` | Ejecuta una sola etapa |
 
@@ -62,9 +62,10 @@ Todos se invocan a mano: Claude no los lanza por su cuenta.
 | docs | `doc-keeper` | sonnet |
 | close | la sesión principal | el de tu sesión |
 
-- **Artefactos:** cada feature vive en `<specs>/NNN-slug/` (`idea.md`, `spec.md`, `plan.md`, `tasks.md`, `verify-report.md`, `review.md`, `docs-report.md` y `state.json`). `state.json` es la única fuente de verdad del estado y solo lo cambia la CLI `sdd-state` del plugin.
+- **Artefactos:** cada feature vive en `<specs>/NNN-slug/` (`idea.md`, `spec.md`, `plan.md`, `tasks.md`, `verify-report.md`, `review.md`, `docs-report.md`, `backlog.md` y `state.json`). `state.json` es la única fuente de verdad del estado y solo lo cambia la CLI `sdd-state` del plugin.
 - **Constitución:** una parte base, igual para todos los proyectos, y una Parte II propia de cada proyecto (`.sdd/constitution.md`), que solo puede endurecer la base.
 - **Hooks:** `role-guard` (cada agente escribe solo en sus rutas y en su etapa), `stage-guard` (no se edita producción sin spec y plan aprobados) y `git-guard` (los subagentes solo usan git de lectura).
+- **Modos de gate** (`gate_mode` en `.sdd/config.json`): `flow` (por defecto) se detiene en spec, review y cierre, más las decisiones mayores (cambios de alcance, incumplir la constitución, dependencias nuevas, migraciones destructivas, romper una API, seguridad o datos, ambigüedades reales, límite de iteraciones); los commits por etapa son automáticos y locales. `strict` se detiene tras cada etapa y pregunta antes de cada commit y push.
 - **Modelos:** se pueden cambiar por proyecto con `models` en `.sdd/config.json`.
 
 ## Actualizar y desinstalar

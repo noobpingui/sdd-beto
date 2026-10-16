@@ -65,6 +65,14 @@ test('cli: config no válida da un error con el campo', (t) => {
   assert.match(res.stderr, /scopes: necesita al menos un ámbito/);
 });
 
+test('cli: show incluye el gate_mode de la config (ADR-0029)', (t) => {
+  const r = makeRepo(t);
+  newFeature(r);
+  const res = r.cli('show', '--feature', '001');
+  assert.equal(res.code, 0, res.stderr);
+  assert.equal(res.data.gate_mode, 'flow');
+});
+
 test('cli: next e init crean la feature en la rama correcta', (t) => {
   const r = makeRepo(t);
   const next = r.cli('next', 'demo');

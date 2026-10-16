@@ -4,7 +4,17 @@ Todos los cambios relevantes de `sdd-beto`. El formato sigue [Keep a Changelog](
 
 ## [Sin publicar]
 
+### Añadido
+- **Modo de gates configurable** ([ADR-0029](docs/decisions/ADR-0029-gate-mode-flow.md)), con `gate_mode` en `.sdd/config.json`:
+  - `flow` (nuevo, **por defecto**): el flujo se detiene solo en tres gates (spec, review y close) y ante decisiones mayores. Los commits por etapa son automáticos y locales, el gate de review resume todas las etapas y el de close aprueba de una vez el commit final, el push, el PR y su merge (merge commit, con borrado de la rama).
+  - `strict`: el comportamiento anterior, con un gate por etapa y cada commit y push aprobados aparte.
+- **Backlog en dos niveles:** los agentes informan de lo que dejan pendiente en un campo `BACKLOG:`; el orquestador lo copia en `<specs>/NNN-slug/backlog.md` y, al cerrar, pasa lo abierto a `paths.backlog` (por defecto `docs/backlog.md`).
+- `sdd-state show` incluye el `gate_mode`, y `/sdd-beto:init` lo propone y lo pregunta.
+
 ### Cambiado
+- **Incompatible:** el comportamiento por defecto pasa de un gate por etapa a `flow`. Para conservar el anterior, añade `"gate_mode": "strict"` a `.sdd/config.json`. Las versiones anteriores rechazan una config con `gate_mode` o `paths.backlog` por "campo desconocido".
+- La constitución base (Art. B3 y B7), el protocolo del orquestador, las skills y los informes finales de los agentes (campos `DECISIONS` y `BACKLOG`) describen los dos modos.
+- La sección "Aprobación humana" de `CLAUDE.md` se genera según el modo; los proyectos existentes la actualizan al reejecutar `/sdd-beto:init`.
 - **El repositorio es público y el plugin tiene licencia MIT** ([ADR-0028](docs/decisions/ADR-0028-repo-publico-mit.md), que sustituye a la ADR-0022): `LICENSE` en la raíz y en `plugins/sdd-beto/`, y `"license": "MIT"` en `plugin.json`. Instalar o actualizar ya no requiere credenciales de GitHub.
 - **README en inglés:** `README.md` pasa a estar en inglés y el español se conserva íntegro en `README.es.md`; cada uno enlaza al otro.
 

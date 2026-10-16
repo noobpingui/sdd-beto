@@ -24,7 +24,7 @@ export function isSddOwned(rel, config) {
   if (/^\.(sdd|claude)(\/|$)/.test(rel)) return true;
   if (/(^|\/)(CLAUDE|CLAUDE\.local|AGENTS)\.md$/.test(rel)) return true;
   const under = (dir) => rel === dir || rel.startsWith(`${dir.replace(/\/+$/, '')}/`);
-  return under(config.paths.specs) || under(config.paths.adr);
+  return under(config.paths.specs) || under(config.paths.adr) || rel === config.paths.backlog;
 }
 
 // Devuelve { kind: 'test' | 'prod' | 'env_example' | 'other', scopes: [nombres] }.

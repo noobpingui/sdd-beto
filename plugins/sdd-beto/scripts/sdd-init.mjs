@@ -288,8 +288,26 @@ function scopesTable(config) {
   return ['| Ámbito | Raíz | Test | Lint | Typecheck | Build |', '|---|---|---|---|---|---|', ...rows].join('\n');
 }
 
+// Reglas de aprobación de la sección "Aprobación humana" según gate_mode (ADR-0029).
+function approvalRules(config) {
+  if (config.gate_mode === 'strict') {
+    return [
+      '- Modo de gates: `strict` (ADR-0004). Un gate por etapa: nunca se encadenan etapas ni se agrupan en una sola aprobación.',
+      '- Antes de cada `git commit`: se muestran los archivos, un resumen y el mensaje propuesto, y se espera la aprobación.',
+      '- Antes de cada `git push`: se muestran la rama de origen, la de destino y los commits, y se espera la aprobación.',
+    ].join('\n');
+  }
+  return [
+    '- Modo de gates: `flow` (ADR-0029 del plugin). El flujo se detiene en tres gates: `spec`, `review` y `close`.',
+    '- Entre gates, el flujo solo se detiene por una decisión mayor: cambiar el alcance de la spec; incumplir la constitución; una dependencia nueva, una migración destructiva o romper una API; algo que afecte a la seguridad o a los datos; una ambigüedad con resultados distintos; o el límite de iteraciones. Lo menor se decide y se anota en el backlog de la feature.',
+    '- Los commits de cada etapa se hacen sin pedir aprobación, solo en local y en la rama de la feature. Nada se sube antes del gate de `close`.',
+    '- El gate de `close` aprueba de una vez el último commit, el push, el PR y su merge.',
+  ].join('\n');
+}
+
 export function renderTemplate(text, config) {
   const vars = {
+    approval_rules: approvalRules(config), backlog: config.paths.backlog,
     specs: config.paths.specs, adr: config.paths.adr, language: config.language, base_branch: config.base_branch,
     branch_feature: config.branches.feature, branch_fix: config.branches.fix, branch_refactor: config.branches.refactor,
     commit_language: config.commits.language, commit_style: config.commits.style, max_iterations: String(config.max_iterations),

@@ -6,11 +6,13 @@
   "branches": { "feature": "feat", "fix": "fix", "refactor": "refactor" },
   "commits": { "language": "en", "style": "imperative, no conventional prefixes" },
   "max_iterations": 3,
+  "gate_mode": "flow",
   "paths": {
     "specs": "specs",
     "adr": "docs/decisions",
     "docs": ["README.md", "docs/**"],
-    "env_examples": ["**/.env.example"]
+    "env_examples": ["**/.env.example"],
+    "backlog": "docs/backlog.md"
   },
   "scopes": {
     "app": {

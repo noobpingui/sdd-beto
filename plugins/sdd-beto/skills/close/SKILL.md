@@ -1,5 +1,5 @@
 ---
-description: SDD stage "close" of sdd-beto - runs the definition-of-done checklist, the final state commit and then PR or merge, each push with its own approval, then presents the human approval gate and the proposed commit. Manual use only.
+description: SDD stage "close" of sdd-beto - runs the definition-of-done checklist and moves open backlog items to the project backlog, then presents the closing gate - in flow mode one approval covers the final commit, push, PR and merge; in strict mode each push is approved separately. Manual use only.
 argument-hint: "[NNN-slug]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git branch --show-current) Bash(git rev-parse *) Bash(node ${CLAUDE_PLUGIN_ROOT}/scripts/sdd-state.mjs *)
@@ -22,5 +22,7 @@ Ejecuta **una sola etapa** del flujo SDD para la feature `$ARGUMENTS` (si está 
    - Si hay un gate pendiente de esta etapa, preséntalo de nuevo en lugar de repetir el trabajo.
    - Repetir una etapa ya aprobada exige reabrirla con `sdd-state rework close`, lo que anula las aprobaciones posteriores (protocolo §5). Pide confirmación antes.
 3. **Etapa `close`:** aplica su nota en "Notas por etapa" de `stages.md`.
-4. Presenta el gate (protocolo §3) y **termina tu turno**.
-5. Cuando el usuario apruebe, registra la aprobación, haz el commit solo si también lo aprobó e informa de que la feature está cerrada y propón la integración (stages.md, "Etapa `close`"). **No** ejecutes la siguiente etapa desde este comando.
+4. Presenta el gate de cierre del modo actual (stages.md, "Etapa `close`") y **termina tu turno**.
+5. Cuando el usuario apruebe:
+   - en `flow`, ejecuta los 5 pasos de la integración en orden y detente en el primero que falle;
+   - en `strict`, registra la aprobación, haz el commit solo si también lo aprobó y propón la integración, con cada push aprobado aparte.

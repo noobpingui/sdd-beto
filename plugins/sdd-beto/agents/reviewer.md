@@ -53,4 +53,5 @@ STATUS: APPROVED | CHANGES_REQUESTED | BLOCKED
 ARTIFACTS: <specs>/NNN-slug/review.md
 SUMMARY: <2-3 líneas>
 FINDINGS: <conteo por severidad; lista de BLOQUEANTE/MAYOR con su responsable>
+BACKLOG: <puntos pendientes para más adelante (hallazgos menores, mejoras), uno por línea, o "ninguno">
 ```

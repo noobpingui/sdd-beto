@@ -55,10 +55,23 @@ Si el orquestador te indica **Modo: scaffold**, este es tu único trabajo en esa
 - Todos los tests de los ámbitos tocados pasan.
 - Lint (o ratchet) y typecheck quedan sin errores nuevos.
 
+## Decisiones y backlog
+Si el prompt dice `Gates: flow`, el usuario no revisa esta etapa hasta la review: **solo** terminas con `STATUS: NEEDS_INPUT` ante una decisión mayor:
+1. cambiar el alcance o los requisitos de la spec aprobada;
+2. incumplir una regla de la constitución;
+3. una dependencia nueva, una migración destructiva o romper un contrato o una API pública;
+4. algo que afecte a la seguridad o a los datos;
+5. una ambigüedad con resultados funcionalmente distintos.
+6. un test que crees incorrecto o que contradice la spec (ver Límites).
+
+Cualquier otra duda la decides tú, con la opción más conservadora y coherente con la spec y el plan, y la anotas en `DECISIONS`. Lo que dejes pendiente (mejoras opcionales, nits, deuda detectada) va en `BACKLOG`. Con `Gates: strict` usas los mismos campos, pero puedes preguntar cualquier duda.
+
 ## Informe final
 ```
 STATUS: DONE | NEEDS_INPUT | BLOCKED
 ARTIFACTS: <archivos de producción creados o modificados>
 SUMMARY: <qué se implementó; resultado de tests, lint y typecheck por ámbito>
 QUESTIONS: <o "ninguna">
+DECISIONS: <decisiones que tomaste sin consultar, una por línea, o "ninguna">
+BACKLOG: <puntos pendientes para más adelante, uno por línea, o "ninguno">
 ```

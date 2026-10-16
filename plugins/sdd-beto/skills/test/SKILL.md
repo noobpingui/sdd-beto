@@ -1,5 +1,5 @@
 ---
-description: SDD stage "tests" of sdd-beto - scaffolds new symbols, has the test-author write failing tests from the spec and the verifier check the red state, then presents the human approval gate and the proposed commit. Manual use only.
+description: SDD stage "tests" of sdd-beto - scaffolds new symbols, has the test-author write failing tests from the spec and the verifier check the red state, then closes the stage as gate_mode requires (human gate, or automatic advance and local commit in flow mode). Manual use only.
 argument-hint: "[NNN-slug]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git branch --show-current) Bash(git rev-parse *) Bash(node ${CLAUDE_PLUGIN_ROOT}/scripts/sdd-state.mjs *)
@@ -22,5 +22,5 @@ Ejecuta **una sola etapa** del flujo SDD para la feature `$ARGUMENTS` (si está 
    - Si hay un gate pendiente de esta etapa, preséntalo de nuevo en lugar de repetir el trabajo.
    - Repetir una etapa ya aprobada exige reabrirla con `sdd-state rework tests`, lo que anula las aprobaciones posteriores (protocolo §5). Pide confirmación antes.
 3. **Etapa `tests`:** aplica su nota en "Notas por etapa" de `stages.md`.
-4. Presenta el gate (protocolo §3) y **termina tu turno**.
-5. Cuando el usuario apruebe, registra la aprobación, haz el commit solo si también lo aprobó e indica el siguiente comando (`/sdd-beto:implement NNN-slug`) o `/sdd-beto:run NNN-slug`. **No** ejecutes la siguiente etapa desde este comando.
+4. Cierra la etapa según `gate_mode` (protocolo §0.1): si en ese modo tiene gate, preséntalo (protocolo §3) y **termina tu turno**; si no, avanza automáticamente (protocolo §3.1).
+5. Tras la aprobación (del usuario o automática), haz el commit según el protocolo §4 e indica el siguiente comando (`/sdd-beto:implement NNN-slug`) o `/sdd-beto:run NNN-slug`. **No** ejecutes la siguiente etapa desde este comando.

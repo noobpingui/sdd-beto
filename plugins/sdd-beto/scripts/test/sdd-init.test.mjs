@@ -7,8 +7,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  findSection, isPluginRule, jsonDiff, localPermissionRules, mergeClaudeMd, mergeLocalPermissions, pluginInfo, posixPath, SECTIONS,
+  findSection, isPluginRule, jsonDiff, localPermissionRules, mergeClaudeMd, mergeLocalPermissions, pluginInfo, posixPath, renderTemplate, SECTIONS,
 } from '../sdd-init.mjs';
+import { applyDefaults } from '../lib/config.mjs';
 
 const CLI = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'sdd-init.mjs');
 
@@ -440,4 +441,16 @@ test('integrate --local-permissions: avisa si settings.local.json está versiona
   const f = res.data.files.find((x) => x.path === '.claude/settings.local.json');
   assert.ok(f.notes.some((n) => n.includes('versionado')));
   assert.ok(!r.exists('.gitignore'));
+});
+
+test('renderTemplate: la sección de aprobación depende de gate_mode (ADR-0029)', () => {
+  const tpl = '{{approval_rules}}\n{{backlog}}';
+  const flow = renderTemplate(tpl, applyDefaults(CONFIG));
+  assert.match(flow, /Modo de gates: `flow`/);
+  assert.match(flow, /sin pedir aprobación/);
+  assert.match(flow, /docs\/backlog\.md$/);
+  const strict = renderTemplate(tpl, applyDefaults({ ...CONFIG, gate_mode: 'strict' }));
+  assert.match(strict, /Modo de gates: `strict`/);
+  assert.match(strict, /Antes de cada `git push`/);
+  assert.doesNotMatch(strict, /\{\{/);
 });

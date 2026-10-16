@@ -14,6 +14,7 @@ export const AGENTS = [
 
 export const COMMAND_KEYS = ['test', 'test_files', 'test_check', 'lint', 'lint_ratchet', 'typecheck', 'build'];
 export const RATCHET_FORMATS = ['ruff', 'eslint'];
+export const GATE_MODES = ['flow', 'strict']; // ADR-0029
 
 export const DEFAULTS = Object.freeze({
   language: 'es',
@@ -21,17 +22,19 @@ export const DEFAULTS = Object.freeze({
   branches: { feature: 'feat', fix: 'fix', refactor: 'refactor' },
   commits: { language: 'en', style: 'imperative, no conventional prefixes' },
   max_iterations: 3,
+  gate_mode: 'flow',
   paths: {
     specs: 'specs',
     adr: 'docs/decisions',
     docs: ['README.md', 'docs/**'],
     env_examples: ['**/.env.example'],
+    backlog: 'docs/backlog.md',
   },
   models: {},
 });
 
 const TOP_KEYS = ['$schema', '$comment', 'schema_version', 'language', 'base_branch', 'branches', 'commits',
-  'max_iterations', 'paths', 'scopes', 'models'];
+  'max_iterations', 'gate_mode', 'paths', 'scopes', 'models'];
 const SCOPE_KEYS = ['root', 'prod', 'tests', 'commands', 'env_hint'];
 
 export class ConfigError extends Error {
@@ -124,11 +127,14 @@ export function validateConfig(c) {
   if (c.max_iterations !== undefined && !(Number.isInteger(c.max_iterations) && c.max_iterations >= 1 && c.max_iterations <= 10)) {
     issues.push('max_iterations: debe ser un entero entre 1 y 10');
   }
+  if (c.gate_mode !== undefined && !GATE_MODES.includes(c.gate_mode)) {
+    issues.push(`gate_mode: debe ser uno de ${GATE_MODES.join(', ')}`);
+  }
   if (c.paths !== undefined) {
     if (!isObj(c.paths)) issues.push('paths: debe ser un objeto');
     else {
-      checkUnknown(c.paths, ['specs', 'adr', 'docs', 'env_examples'], 'paths', issues);
-      for (const k of ['specs', 'adr']) if (c.paths[k] !== undefined && !isSafeRel(c.paths[k])) issues.push(`paths.${k}: ruta relativa no válida`);
+      checkUnknown(c.paths, ['specs', 'adr', 'docs', 'env_examples', 'backlog'], 'paths', issues);
+      for (const k of ['specs', 'adr', 'backlog']) if (c.paths[k] !== undefined && !isSafeRel(c.paths[k])) issues.push(`paths.${k}: ruta relativa no válida`);
       for (const k of ['docs', 'env_examples']) if (c.paths[k] !== undefined) checkGlobList(c.paths[k], `paths.${k}`, issues);
     }
   }
@@ -159,6 +165,7 @@ export function applyDefaults(c) {
     branches: { ...d.branches, ...(c.branches || {}) },
     commits: { ...d.commits, ...(c.commits || {}) },
     max_iterations: c.max_iterations ?? d.max_iterations,
+    gate_mode: c.gate_mode ?? d.gate_mode,
     paths: { ...d.paths, ...(c.paths || {}) },
     scopes,
     models: { ...(c.models || {}) },

@@ -51,4 +51,6 @@ STATUS: DONE | NEEDS_INPUT | BLOCKED
 ARTIFACTS: <specs>/NNN-slug/spec.md
 SUMMARY: <2-4 líneas: nº de REQ/AC/NFR y alcance>
 QUESTIONS: <Q1..Qn con su propuesta por defecto, o "ninguna">
+DECISIONS: <decisiones que tomaste sin consultar, una por línea, o "ninguna">
+BACKLOG: <puntos pendientes para más adelante, uno por línea, o "ninguno">
 ```

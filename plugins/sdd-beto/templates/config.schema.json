@@ -40,6 +40,11 @@
       }
     },
     "max_iterations": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 },
+    "gate_mode": {
+      "enum": ["flow", "strict"],
+      "default": "flow",
+      "description": "Human gates (ADR-0029). flow: the run stops only at spec, review and close (plus major decisions) and stage commits are automatic and local. strict: a gate after every stage and a separate approval for every commit and push."
+    },
     "paths": {
       "type": "object",
       "additionalProperties": false,
@@ -51,7 +56,12 @@
           "$ref": "#/$defs/globList",
           "default": ["README.md", "docs/**"]
         },
-        "env_examples": { "$ref": "#/$defs/globList", "default": ["**/.env.example"] }
+        "env_examples": { "$ref": "#/$defs/globList", "default": ["**/.env.example"] },
+        "backlog": {
+          "$ref": "#/$defs/relPath",
+          "default": "docs/backlog.md",
+          "description": "Project-wide backlog file; on close the orchestrator appends each feature's open items (ADR-0029)."
+        }
       }
     },
     "scopes": {

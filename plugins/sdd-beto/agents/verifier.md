@@ -69,4 +69,5 @@ MODE: red | full
 ARTIFACTS: <specs>/NNN-slug/verify-report.md, <specs>/NNN-slug/state.json
 SUMMARY: <una línea por comprobación con ✅/❌/⚠️>
 FAILURES: <cada fallo con responsable probable: test-author | implementer | entorno, o "ninguno">
+BACKLOG: <puntos pendientes para más adelante (hallazgos menores, mejoras), uno por línea, o "ninguno">
 ```

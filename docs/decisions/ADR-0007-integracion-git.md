@@ -1,6 +1,7 @@
 # ADR-0007 — Git: rama por feature y un commit por etapa, solo desde el orquestador
 
 - **Estado:** Aceptada · 2026-09-25
+- **Sustituida en parte por:** ADR-0029 (en modo `flow`, los commits por etapa son automáticos y locales, y el cierre aprueba de una vez el push, el PR y el merge)
 - **Decidido por:** usuario (granularidad) y Claude (convenciones)
 
 ## Contexto

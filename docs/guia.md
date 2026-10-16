@@ -27,7 +27,7 @@ Las rutas `specs/` y `docs/decisions/` son las de por defecto; se cambian en la 
 
 No confundas las ADRs de tu proyecto con las del plugin. Las del repositorio `sdd-beto` explican cómo está diseñado el plugin; las de `docs/decisions/` de tu proyecto recogen las decisiones de tu aplicación.
 
-**Quién hace qué:** tú das la idea (`/sdd-beto:new`), arrancas el flujo (`/sdd-beto:run`), respondes a las preguntas y apruebas o pides cambios en cada gate. El harness hace el trabajo de cada etapa con su agente especializado y se detiene en cada una. No elige qué construir, no avanza sin tu "aprobado", no hace commits ni pushes sin tu permiso y no instala nada en tu entorno.
+**Quién hace qué:** tú das la idea (`/sdd-beto:new`), arrancas el flujo (`/sdd-beto:run`), respondes a las preguntas y apruebas o pides cambios en cada gate. El harness hace el trabajo de cada etapa con su agente especializado y se detiene en los gates que marca `gate_mode`: con `flow` (por defecto), en la spec, la review y el cierre; con `strict`, en cada etapa. No elige qué construir, no pasa un gate sin tu "aprobado", no sube nada al remoto sin tu permiso y no instala nada en tu entorno.
 
 ## 2. Antes de empezar
 - El proyecto tiene que ser un **repositorio git**, a ser posible con el árbol de trabajo limpio.
@@ -83,7 +83,16 @@ Propone el tipo (`feature`, `fix` o `refactor`), los ámbitos que toca, el núme
 ```
 /sdd-beto:run [NNN-slug]
 ```
-Ejecuta la etapa actual, te presenta su gate y, cuando apruebas, sigue con la siguiente. Si cierras la sesión, `/sdd-beto:run` retoma donde lo dejaste: el estado vive en `state.json`.
+Ejecuta las etapas en orden y se detiene en los gates de tu `gate_mode` (ADR-0029). Si cierras la sesión, `/sdd-beto:run` retoma donde lo dejaste: el estado vive en `state.json`.
+
+**Modo `flow` (por defecto): tres gates.**
+1. **spec:** apruebas la spec y se hace su commit.
+2. **review:** el flujo pasa solo por plan, tasks, tests, implement y verify, con un commit local por etapa. Después ves un resumen de todas las etapas (decisiones de cada agente, ADRs nuevas, correcciones automáticas y commits), el veredicto y el backlog de la feature. Desde aquí puedes pedir que se rehaga cualquier etapa o que se resuelva ya algún punto del backlog.
+3. **close:** tras los docs, una sola aprobación cubre el último commit, el push, el PR y su merge (merge commit, con borrado de la rama).
+
+Entre gates, el flujo solo se detiene por una **decisión mayor**: cambiar el alcance de la spec, incumplir la constitución, una dependencia nueva, una migración destructiva o romper una API, algo que afecte a la seguridad o a los datos, una ambigüedad con resultados distintos, o el límite de iteraciones. Lo menor lo decide el agente y queda en `<specs>/NNN-slug/backlog.md`. Al cerrar, lo que siga abierto pasa al backlog del proyecto (`paths.backlog`, por defecto `docs/backlog.md`).
+
+**Modo `strict`:** un gate al final de cada etapa, con el commit aprobado en ese mismo gate y cada push aparte. La tabla siguiente es lo que conviene revisar en cada gate de `strict`. En `flow`, todo eso se revisa de una vez en el gate de review.
 
 | Etapa | Qué produce | Qué revisar en el gate |
 |---|---|---|
@@ -100,21 +109,21 @@ Ejecuta la etapa actual, te presenta su gate y, cuando apruebas, sigue con la si
 `verify` no tiene commit propio: su informe entra en el commit de la review.
 
 ### Responder a un gate
-Cada gate termina con una o dos preguntas: aprobar la etapa y, si la hay, aprobar su commit.
+En `strict`, cada gate termina con una o dos preguntas: aprobar la etapa y, si la hay, aprobar su commit. En `flow`, una sola pregunta por gate.
 - **Aprobar:** "aprobado", "sí", "1) aprobado 2) aprobado". El silencio, una pregunta o un "luego vemos" no aprueban.
 - **Pedir cambios:** di qué quieres cambiar. Tus palabras se copian literalmente en el artefacto y el agente de la etapa lo rehace; después verás el gate de nuevo.
-- **Aprobar la etapa pero no el commit:** los cambios se acumulan para el siguiente commit.
+- **Aprobar la etapa pero no el commit** (solo `strict`): los cambios se acumulan para el siguiente commit.
 - **Preguntas de un agente** (sobre todo en la spec): se muestran con una respuesta propuesta. Basta con "OK a todas" o con indicar solo las que cambias.
-- **Push:** siempre se propone aparte, con la rama y los commits, y necesita su propia aprobación.
+- **Push:** en `strict`, siempre se propone aparte, con la rama y los commits, y necesita su propia aprobación. En `flow`, va en el gate de cierre junto con el PR y el merge.
 
-Tu "aprobado" en el chat **es** la aprobación del commit (ADR-0025). Según tu modo de permisos, Claude Code puede pedirte además su permiso propio para `git commit` o `git push`.
+Tu "aprobado" en el chat **es** la aprobación del commit o del push (ADR-0025). Según tu modo de permisos, Claude Code puede pedirte además su permiso propio para `git commit` o `git push`.
 
 ## 5. Correcciones
 - **Red check `FAIL`:** los tests no fallan por el motivo correcto (o alguno pasa sin implementación). Vuelven al `test-author`.
 - **Verify `FAIL`:** el informe dice a quién se atribuye cada fallo, al código o a un test, y vuelve a ese agente.
-- **Review `CHANGES_REQUESTED`:** los hallazgos bloqueantes y mayores vuelven a su responsable; después se repiten verify y review. Los menores y los "nit" los decides tú en el gate.
+- **Review `CHANGES_REQUESTED`:** los hallazgos bloqueantes y mayores vuelven a su responsable; después se repiten verify y review. Los menores y los "nit" los decides tú en el gate (`strict`) o van al backlog y los ves en el gate de review (`flow`).
 - **Límite:** cada contador (tests, implement, review) admite `max_iterations` intentos (3 por defecto). Si se agotan, la feature se bloquea y recibes un resumen con las opciones.
-- Cada corrección pasa por los gates de las etapas que se repiten, aunque alguno sea de trámite: una etapa, una aprobación.
+- En `strict`, cada corrección pasa por los gates de las etapas que se repiten, aunque alguno sea de trámite. En `flow`, los ciclos corren solos hasta el límite y se resumen en el gate de review.
 
 ## 6. Otros comandos
 - **`/sdd-beto:status [NNN-slug]`:** tabla de features, detalle de la actual, comprobaciones de consistencia y el siguiente paso sugerido. Nunca modifica nada.
@@ -126,7 +135,7 @@ La constitución base (Art. B1.2) permite, sin spec completa pero con commit apr
 Para un hotfix, reinicia Claude Code con la variable de entorno `SDD_BYPASS=1`: el `stage-guard` deja de bloquear la edición de producción fuera de una feature. Después hay que documentarlo con una spec retroactiva. Los guards de los subagentes siguen activos.
 
 ## 8. Configuración
-- **`.sdd/config.json`:** ámbitos (globs de producción y de test, comandos), rutas, idioma, ramas, estilo de commits, iteraciones y modelos. El esquema está en `plugins/sdd-beto/templates/config.schema.json`. Cambiarla es un cambio del proyecto con su propio commit; `/sdd-beto:status` te enseña cómo clasifica los archivos.
+- **`.sdd/config.json`:** ámbitos (globs de producción y de test, comandos), rutas (incluido el backlog del proyecto), idioma, ramas, estilo de commits, iteraciones, modo de gates (`gate_mode`: `flow` o `strict`) y modelos. El esquema está en `plugins/sdd-beto/templates/config.schema.json`. Cambiarla es un cambio del proyecto con su propio commit; `/sdd-beto:status` te enseña cómo clasifica los archivos.
 - **Comandos:** deben funcionar tanto en la shell del sistema (`cmd.exe` en Windows) como en Bash o PowerShell. Pon entre comillas las rutas a ejecutables.
 - **Modelos:** `"models": { "verifier": "sonnet" }` cambia el modelo de un agente en ese proyecto.
 - **Plantillas:** si creas `.sdd/templates/<nombre>.md`, se usa en lugar de la del plugin (spec, plan, tasks, informes y secciones de `CLAUDE.md`).

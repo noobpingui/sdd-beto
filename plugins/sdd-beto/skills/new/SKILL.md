@@ -36,5 +36,5 @@ Lee primero el protocolo (§0 y §4) y `.sdd/config.json`. Si la config no exist
    3. Crea `<specs>/NNN-slug/idea.md` con la idea **literal** del usuario, precedida de un encabezado `# Idea original · NNN-slug` y la fecha (`sdd-state now`). Normaliza solo los saltos de línea y sangrías que introduce el prompt; no cambies ninguna palabra.
    4. **No hagas commit.** Estos archivos entran en el commit de la etapa `spec`.
 5. **Cierre:** muestra lo creado e indica los siguientes pasos:
-   - `/sdd-beto:run NNN-slug`, que recorre todo el flujo con un gate en cada etapa;
+   - `/sdd-beto:run NNN-slug`, que recorre todo el flujo y se detiene en los gates que marca `gate_mode` (en `flow`: spec, review y close);
    - o `/sdd-beto:spec NNN-slug`, que ejecuta solo la etapa spec.

@@ -9,9 +9,8 @@ Origen de cada idea: **v1** = aplazada por la [ADR-0021](decisions/ADR-0021-alca
 | Idea | Motivo | Origen |
 |---|---|---|
 | **Modo `refactor`** con red check invertido: tests de caracterización que ya pasan antes del cambio y deben seguir pasando | Hoy el tipo `refactor` solo cambia el prefijo de la rama. Un refactor puro no supera el red check, que exige tests que fallen (ver la guía, §4) | v1 |
-| **Menos pausas** (`gate_mode`): agrupar gates de etapas mecánicas, con la opción documentada y elegida por proyecto | Una feature pequeña, con una corrección, pasó por más de una decena de gates. Chocaría con la ADR-0004 ("una etapa, una aprobación"), así que necesita una ADR que la sustituya en parte | v1 |
 | **Modo ligero** para cambios triviales, dentro de las excepciones del Art. B1.2 | Una feature pequeña generó 27 criterios, 31 tareas y 26 tests: coherente con la trazabilidad, pero pesado | F6 (O3) |
-| **Cerrar `implement` en el gate de una corrección** que solo toca tests | Evita un gate de trámite. Se decidió **no** hacerlo en la v1 para no debilitar la ADR-0004; se reconsidera junto con `gate_mode` | F6 (O5) |
+| **Cerrar `implement` en el gate de una corrección** que solo toca tests, en modo `strict` | Evita un gate de trámite. En `flow` ya no existe ese gate (ADR-0029); en `strict` se mantiene para no debilitar la ADR-0004 | F6 (O5) |
 
 ## Hooks y guardias
 

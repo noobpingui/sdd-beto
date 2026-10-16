@@ -195,6 +195,7 @@ function cmdShow(ctx, opt) {
   const approvals = Object.fromEntries(S.STAGES.map((s) => [s, st.approvals[s] ? st.approvals[s].at : null]));
   return {
     feature, title: st.title, type: st.type, scope: st.scope, branch: st.branch, base_branch: st.base_branch,
+    gate_mode: ctx.config.gate_mode, // de la config, no de state.json (ADR-0029)
     stage: st.stage, status: st.status, approvals, iterations: st.iterations, max_iterations: st.max_iterations,
     red_check: st.red_check, verify: st.verify, review: st.review, commits: st.commits,
     tests_snapshot: st.tests_snapshot ? { at: st.tests_snapshot.at, files: Object.keys(st.tests_snapshot.sha256).length } : null,
