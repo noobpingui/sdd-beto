@@ -17,6 +17,7 @@ Each stage is run by a specialized subagent with its own permissions. The main s
 - **Real TDD:** tests are written before the code, and a `verifier` checks that they fail for the right reason (red check) before implementation starts.
 - **Independent review:** a `reviewer` that uses the project's constitution as its checklist, with a fix loop capped by an iteration limit.
 - **Up-to-date documentation:** a `doc-keeper` updates the affected documentation and the Project section of `CLAUDE.md`.
+- **A flow that doesn't stall:** three human gates by default, automatic local commits in between and a backlog where minor decisions are logged instead of interrupting you.
 - **Generic:** paths, commands, scopes (monorepos included) and conventions live in each project's `.sdd/config.json` and constitution, which `/sdd-beto:init` generates.
 
 ## Requirements
@@ -34,7 +35,7 @@ The short form `noobpingui/sdd-beto` works too: Claude Code clones over SSH if y
 ## Quick start
 At the project root, inside Claude Code:
 
-1. **`/sdd-beto:init`**: analyzes the repo and proposes, step by step and with your approval, the config, the project constitution and the `CLAUDE.md` sections. It ends with a commit on a `chore/sdd-init` branch.
+1. **`/sdd-beto:init`**: analyzes the repo and proposes, step by step and with your approval, the config (including the gate mode), the project constitution and the `CLAUDE.md` sections. In `flow` mode it also offers local permissions so the stage commits don't prompt. It ends with a commit on a `chore/sdd-init` branch.
 2. **`/sdd-beto:new <slug> <idea>`**: creates the feature (number, branch and folder). For example: `/sdd-beto:new export-csv Export the monthly report to CSV`.
 3. **`/sdd-beto:run`**: walks through the flow. It stops for you to approve the spec, then runs on its own (with a local commit per stage) up to the review, where you get a summary of every stage and the backlog. The close gate pushes, opens the PR and merges it; answer "approved" at each gate.
 
@@ -67,8 +68,29 @@ All of them are invoked by hand: Claude doesn't launch them on its own.
 - **Artifacts:** each feature lives in `<specs>/NNN-slug/` (`idea.md`, `spec.md`, `plan.md`, `tasks.md`, `verify-report.md`, `review.md`, `docs-report.md`, `backlog.md` and `state.json`). `state.json` is the single source of truth for the state and only the plugin's `sdd-state` CLI changes it.
 - **Constitution:** a base part, the same for every project, and a Part II specific to each project (`.sdd/constitution.md`), which can only tighten the base.
 - **Hooks:** `role-guard` (each agent writes only to its own paths and in its own stage), `stage-guard` (production code isn't edited without an approved spec and plan) and `git-guard` (subagents only use read-only git).
-- **Gate modes** (`gate_mode` in `.sdd/config.json`): `flow` (default) stops at spec, review and close, plus major decisions (scope changes, constitution breaches, new dependencies, destructive migrations, broken APIs, security or data, real ambiguities, iteration limit); stage commits are automatic and local. `strict` stops after every stage and asks before every commit and push.
 - **Models:** they can be changed per project with `models` in `.sdd/config.json`.
+
+## Gates and approvals
+`gate_mode` in `.sdd/config.json` sets how often the flow stops for you ([ADR-0029](docs/decisions/ADR-0029-gate-mode-flow.md)).
+
+| | `flow` (default) | `strict` |
+|---|---|---|
+| Gates | spec, review and close | after every stage |
+| Stage commits | automatic, local, on the feature branch | approved at each stage's gate |
+| Push, PR and merge | one approval at the close gate | each push approved separately |
+
+**With `flow`:**
+1. **Spec gate:** you approve what will be built. The spec is committed.
+2. **plan → tasks → tests → implement → verify** run on their own, with one local commit per stage and automatic fix loops. Nothing leaves your machine.
+3. **Review gate:** a summary of every stage (each agent's decisions, new ADRs, automatic fixes, commits), the reviewer's verdict and the feature backlog. From here you can send any stage back for rework or ask for a backlog item to be fixed now.
+4. **docs** runs on its own.
+5. **Close gate:** the definition-of-done checklist and, with a single approval, the final commit, the push, the PR (`gh pr create`), its merge as a merge commit (`gh pr merge --merge --delete-branch`) and the return to the base branch. If any step fails, the flow stops there and explains what's left.
+
+Between gates the flow stops **only for a major decision**: changing the approved spec's scope, breaching the constitution, a new dependency, a destructive migration or a broken public API, anything touching security or data, an ambiguity with functionally different outcomes, or the iteration limit. Anything else (naming, style, optional improvements, minor review findings) is decided by the agent and logged.
+
+**Backlog in two levels:** each agent reports what it left pending, and the orchestrator copies it into `<specs>/NNN-slug/backlog.md`. On close, the open items move to the project backlog (`paths.backlog`, `docs/backlog.md` by default), with a link to the feature.
+
+**Permissions:** with `flow`, `/sdd-beto:init` offers to allow `git add` and `git commit` in `.claude/settings.local.json` (personal, not versioned) so the automatic commits don't prompt. It never allows `git push`: depending on your permission mode, Claude Code may still ask before the push and the `gh` commands at close.
 
 ## Updating and uninstalling
 ```
@@ -77,6 +99,8 @@ claude plugin update sdd-beto@sdd-beto
 claude plugin uninstall sdd-beto@sdd-beto
 ```
 After updating, run `/sdd-beto:init` again in each project: it enters update mode, proposes only what changed and, if you use local permissions, points them at the new version.
+
+**Coming from 0.1.0:** the default changes from a gate at every stage to `flow` as soon as you update, even before running `init`. To keep the old behavior, add `"gate_mode": "strict"` to `.sdd/config.json`. Running `init` regenerates the "Aprobación humana" (human approval) section of `CLAUDE.md` for your mode and offers the commit permissions. Versions before 0.2.0 reject a config that contains `gate_mode` or `paths.backlog`.
 
 ## Documentation
 All in Spanish:
