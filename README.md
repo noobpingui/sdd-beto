@@ -92,6 +92,19 @@ Between gates the flow stops **only for a major decision**: changing the approve
 
 **Permissions:** with `flow`, `/sdd-beto:init` offers to allow `git add` and `git commit` in `.claude/settings.local.json` (personal, not versioned) so the automatic commits don't prompt. It never allows `git push`: depending on your permission mode, Claude Code may still ask before the push and the `gh` commands at close.
 
+### Switching between `flow` and `strict`
+Change the mode **between features**: before `/sdd-beto:new` or after a feature is closed, never halfway through one. The mode applies to the whole project, and a feature that changes mode halfway mixes two ways of working (stages already approved automatically stay approved).
+
+1. Go back to the base branch with no feature in progress (`/sdd-beto:status` shows it).
+2. Run **`/sdd-beto:init`** and ask for the mode change, for example: `/sdd-beto:init switch to strict mode`. Init enters update mode, proposes only this diff in `.sdd/config.json`:
+   ```json
+   "gate_mode": "strict"
+   ```
+   (`"flow"` to go back, or remove the field, since `flow` is the default), regenerates the "Aprobación humana" section of `CLAUDE.md` for the new mode and commits both on its own branch, each step with your approval.
+3. Merge that branch into the base branch, and the next `/sdd-beto:new` runs in the new mode.
+
+You can also edit `.sdd/config.json` by hand, but then run `/sdd-beto:init` anyway, or `CLAUDE.md` will keep describing the previous mode's approval rules.
+
 ## Updating and uninstalling
 ```
 claude plugin marketplace update sdd-beto
